@@ -1303,18 +1303,41 @@ let favorites = new Set();
 let topojsonData = null;
 
 // ============== LOAD MAP ==============
-const TOPO_URL = 'https://cdn.jsdelivr.net/gh/udit-001/india-maps-data@master/topojson/india.json';
+// Multiple TopoJSON sources with fallback
+const TOPO_SOURCES = [
+  { url: 'https://cdn.jsdelivr.net/gh/geohacker/india@master/state/india.geojson', type: 'geojson' },
+  { url: 'https://raw.githubusercontent.com/Subhash9325/GeoJson-Data-of-Indian-States/master/Indian_States', type: 'geojson' },
+  { url: 'https://cdn.jsdelivr.net/gh/udit-001/india-maps-data@master/topojson/india.json', type: 'topojson', obj: 'states', prop: 'st_nm' },
+];
+
+function getStateName(props) {
+  // Try common property names used across different sources
+  return props.NAME_1 || props.st_nm || props.name || props.NAME || props.State || props.state || props.ST_NM || '';
+}
 
 async function loadMap(){
-  try{
-    const resp = await fetch(TOPO_URL);
-    const topo = await resp.json();
-    topojsonData = topo;
-    renderMap(topo);
-  }catch(e){
-    console.error('Failed to load India topojson', e);
-    document.querySelector('.map-wrap').innerHTML = '<div style="color:#888; padding:40px; text-align:center;">Could not load map data. Check network.</div>';
+  for (const src of TOPO_SOURCES) {
+    try {
+      const resp = await fetch(src.url);
+      if (!resp.ok) continue;
+      const data = await resp.json();
+      let geojson;
+      if (src.type === 'geojson') {
+        geojson = data;
+      } else {
+        const objKey = src.obj || Object.keys(data.objects)[0];
+        geojson = topojson.feature(data, data.objects[objKey]);
+      }
+      if (!geojson.features || geojson.features.length === 0) continue;
+      console.log('[map] Loaded from:', src.url, 'features:', geojson.features.length);
+      topojsonData = data;
+      renderMap(geojson);
+      return;
+    } catch(e) {
+      console.warn('[map] Source failed:', src.url, e.message);
+    }
   }
+  document.querySelector('.map-wrap').innerHTML = '<div style="color:#888; padding:40px; text-align:center;">Could not load map. Check network.</div>';
 }
 
 // Simple projection (Mercator-ish) for India bounding box
@@ -1378,9 +1401,8 @@ function getCentroid(geom){
   return [x,y];
 }
 
-function renderMap(topo){
-  // Convert topojson states to geojson
-  const states = topojson.feature(topo, topo.objects.states);
+function renderMap(states){
+  // states is already a GeoJSON FeatureCollection
   const w = 800, h = 800;
   const project = buildProjection(states, w, h, 30);
 
@@ -1390,7 +1412,7 @@ function renderMap(topo){
   statesG.innerHTML = ''; labelsG.innerHTML=''; pulsesG.innerHTML='';
 
   states.features.forEach(f => {
-    const name = f.properties.st_nm;
+    const name = getStateName(f.properties);
     const data = getStateData(name);
     const path = document.createElementNS('http://www.w3.org/2000/svg','path');
     path.setAttribute('d', geomToPath(f.geometry, project));
@@ -1690,5 +1712,6 @@ setTimeout(() => {
 
 setTimeout(renderFavorites, 1500);
 
+</script>
 </body>
 </html>
