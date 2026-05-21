@@ -443,13 +443,7 @@
       <span class="sub">Live political &middot; social signal</span>
     </div>
   </div>
-  <div class="nav-pills">
-    <button class="nav-pill active">Map</button>
-    <button class="nav-pill">Narratives</button>
-    <button class="nav-pill">Favorites</button>
-    <button class="nav-pill">Daily digest</button>
-    <button class="nav-pill">About</button>
-  </div>
+
   <div class="topbar-right">
     <div class="live-status"><span class="live-dot"></span>LIVE &middot; <span id="live-signal-count">…</span> signals</div>
     <div class="timestamp" id="clock">--:--:-- IST</div>
@@ -1303,36 +1297,52 @@ let favorites = new Set();
 let topojsonData = null;
 
 // ============== LOAD MAP ==============
-const TOPO_URL = 'https://cdn.jsdelivr.net/gh/udit-001/india-maps-data@master/topojson/india.json';
+function getStateName(props) {
+  return props.NAME_1 || props.st_nm || props.name || props.NAME || props.State || props.state || props.ST_NM || props.shapeName || '';
+}
 
 async function loadMap(){
-  try{
-    const resp = await fetch(TOPO_URL);
-    const topo = await resp.json();
-    topojsonData = topo;
-    renderMap(topo);
-  }catch(e){
-    console.error('Failed to load India topojson', e);
-    document.querySelector('.map-wrap').innerHTML = '<div style="color:#888; padding:40px; text-align:center;">Could not load map data. Check network.</div>';
+  const url = 'https://cdn.jsdelivr.net/gh/udit-001/india-maps-data@master/topojson/india.json';
+  try {
+    const r = await fetch(url);
+    const topo = await r.json();
+    const geojson = topojson.feature(topo, topo.objects.states);
+    console.log('[map] features:', geojson.features.length);
+    console.log('[map] sample props:', JSON.stringify(geojson.features[0].properties));
+    renderMap(geojson);
+    return;
+  } catch(e) {
+    console.error('[map] Failed:', e.message);
+  }
+  // Final fallback — render a text message
+  document.querySelector('.map-wrap').innerHTML = \`
+    <div style="color:#888;padding:60px 40px;text-align:center;font-family:monospace">
+      <div style="font-size:14px;margin-bottom:12px">Map tiles unavailable</div>
+      <div style="font-size:11px;color:#555">Data API is live — click a state name below to open its panel</div>
+      <div id="state-list" style="margin-top:20px;display:flex;flex-wrap:wrap;gap:8px;justify-content:center"></div>
+    </div>
+  \`;
+  // Render clickable state list as fallback UI
+  const list = document.getElementById('state-list');
+  if (list) {
+    const states = Object.keys(STATE_DATA).sort();
+    list.innerHTML = states.map(s => {
+      const d = STATE_DATA[s] || {};
+      const col = attentionColor(d.attention || 0);
+      return \`<span onclick="selectState('\${s}')" style="cursor:pointer;padding:6px 10px;border-radius:6px;border:1px solid \${col};color:\${col};font-size:11px">\${s}</span>\`;
+    }).join('');
   }
 }
 
 // Simple projection (Mercator-ish) for India bounding box
 // India bbox roughly: lon 68-97, lat 7-37
-function buildProjection(geo, width, height, padding=20){
-  // compute bbox from geometry
-  let minLon=Infinity,maxLon=-Infinity,minLat=Infinity,maxLat=-Infinity;
-  function walk(c){
-    if(typeof c[0]==='number'){
-      minLon=Math.min(minLon,c[0]); maxLon=Math.max(maxLon,c[0]);
-      minLat=Math.min(minLat,c[1]); maxLat=Math.max(maxLat,c[1]);
-    } else c.forEach(walk);
-  }
-  geo.features.forEach(f => walk(f.geometry.coordinates));
-  const lonRange = maxLon-minLon, latRange = maxLat-minLat;
-  // mercator y compression
+function buildProjection(geo, width, height, padding=30){
+  // Use hardcoded India bounding box for reliable projection
+  // India: lon 68.1-97.4, lat 6.5-35.7
+  const minLon=68.1, maxLon=97.4, minLat=6.5, maxLat=35.7;
   function mercY(lat){ return Math.log(Math.tan(Math.PI/4 + lat*Math.PI/360)); }
   const yMin = mercY(minLat), yMax = mercY(maxLat);
+  const lonRange = maxLon - minLon;
   const yRange = yMax - yMin;
   const scaleX = (width - padding*2) / lonRange;
   const scaleY = (height - padding*2) / yRange;
@@ -1378,9 +1388,8 @@ function getCentroid(geom){
   return [x,y];
 }
 
-function renderMap(topo){
-  // Convert topojson states to geojson
-  const states = topojson.feature(topo, topo.objects.states);
+function renderMap(states){
+  // states is already a GeoJSON FeatureCollection
   const w = 800, h = 800;
   const project = buildProjection(states, w, h, 30);
 
@@ -1390,7 +1399,8 @@ function renderMap(topo){
   statesG.innerHTML = ''; labelsG.innerHTML=''; pulsesG.innerHTML='';
 
   states.features.forEach(f => {
-    const name = f.properties.st_nm;
+    if (!f.geometry) return;  // skip null geometries
+    const name = getStateName(f.properties);
     const data = getStateData(name);
     const path = document.createElementNS('http://www.w3.org/2000/svg','path');
     path.setAttribute('d', geomToPath(f.geometry, project));
