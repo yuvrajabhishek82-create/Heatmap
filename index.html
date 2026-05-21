@@ -1418,6 +1418,8 @@ function renderMap(topo){
   
   applyLayer();
   attachInteractions();
+  // Re-apply layer after a short delay in case live data arrived during render
+  setTimeout(applyLayer, 2000);
 }
 
 function applyLayer(){
@@ -1671,7 +1673,10 @@ setInterval(updateClock, 1000); updateClock();
 
 // ============== INIT ==============
 loadMap();
-startLivePolling();  // Fetch live data from backend API
+// Wait for map SVG to render, then fetch live data and re-apply colors
+setTimeout(async () => {
+  await startLivePolling();
+}, 1200);
 
 // Auto-select the most-attention state after map loads
 setTimeout(() => {
@@ -1685,5 +1690,6 @@ setTimeout(() => {
 
 setTimeout(renderFavorites, 1500);
 
+</script>
 </body>
 </html>
