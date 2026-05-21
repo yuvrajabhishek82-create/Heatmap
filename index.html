@@ -755,14 +755,26 @@ function capitalize(s) {
   return s ? s.charAt(0).toUpperCase() + s.slice(1) : s;
 }
 
-// Poll for fresh data every 5 minutes
+// Poll aggressively on startup until we have real data, then every 5 min
 async function startLivePolling() {
   await Promise.all([fetchAllStates(), fetchDailySnapshot()]);
-  setInterval(async () => {
+  let retries = 0;
+  const fastPoll = setInterval(async () => {
+    retries++;
     await fetchAllStates();
     await fetchDailySnapshot();
-    if (selectedState) renderStatePanel(selectedState); // refresh open panel
-  }, 5 * 60 * 1000);
+    if (selectedState) renderStatePanel(selectedState);
+    applyLayer();
+    if (retries >= 12) {
+      clearInterval(fastPoll);
+      setInterval(async () => {
+        await fetchAllStates();
+        await fetchDailySnapshot();
+        if (selectedState) renderStatePanel(selectedState);
+        applyLayer();
+      }, 5 * 60 * 1000);
+    }
+  }, 15000);
 }
 
 // ========== STATIC MOCK DATA (fallback when API unavailable) ==========
