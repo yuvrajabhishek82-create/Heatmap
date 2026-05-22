@@ -140,8 +140,12 @@ class Store:
         self.seen_urls: set[str] = set()
         self.last_ingest: datetime | None = None
         self.ingest_running: bool = False
-        # 8-slot daily history per state (circular)
         self.history: dict[str, list[float]] = {s: [] for s in INDIAN_STATES}
+        # Pre-serialized response cache — served instantly to frontend
+        self.cache_states: list | None = None          # /api/states response
+        self.cache_snapshot: dict | None = None        # /api/snapshot/daily response
+        self.cache_state_detail: dict[str, dict] = {}  # /api/state/{name} responses
+        self.cache_built_at: datetime | None = None
 
     def add_signal(self, state: str, sig: dict) -> bool:
         """Returns True if the signal was new (not a dupe)."""
@@ -455,6 +459,63 @@ async def recompute_all_scores():
             store.scores[state] = result
         else:
             print(f"[score] Error for {state}: {result}")
+    # Build response cache immediately after scoring
+    await build_response_cache()
+
+
+async def build_response_cache():
+    """Pre-serialize all API responses into cache for instant serving."""
+    now = datetime.now(timezone.utc)
+
+    # Cache /api/states (lightweight heatmap data)
+    store.cache_states = [
+        {
+            "name": s["name"],
+            "attention": s["attention"],
+            "delta_24h": s["delta_24h"],
+            "velocity": s["velocity"],
+            "dominant_emotion": s.get("dominant_emotion", "anxiety"),
+            "dominant_narrative": s.get("dominant_narrative", "governance"),
+        }
+        for s in store.scores.values()
+        if isinstance(s, dict)
+    ]
+
+    # Cache /api/state/{name} detail for every state
+    for state, score in store.scores.items():
+        if isinstance(score, dict):
+            store.cache_state_detail[state] = score
+
+    # Cache /api/snapshot/daily
+    scored = [s for s in store.scores.values() if isinstance(s, dict) and s]
+    if scored:
+        hottest    = max(scored, key=lambda s: s.get("attention", 0))
+        coolest    = min(scored, key=lambda s: s.get("attention", 0))
+        fastest_up = max(scored, key=lambda s: s.get("delta_24h", 0))
+        fastest_dn = min(scored, key=lambda s: s.get("delta_24h", 0))
+        def polarization(s):
+            emos = list(s.get("emotions", {}).values())
+            return max(emos) - min(emos) if emos else 0
+        most_polarized = max(scored, key=polarization)
+        nar_agg: dict[str, float] = {}
+        for s in scored:
+            for n in s.get("narratives", []):
+                nar_agg[n["name"]] = nar_agg.get(n["name"], 0) + n["val"]
+        top_nar = max(nar_agg.items(), key=lambda x: x[1], default=("governance", 0))[0]
+        store.cache_snapshot = {
+            "hottest_state":          hottest["name"],
+            "hottest_score":          hottest["attention"],
+            "coolest_state":          coolest["name"],
+            "fastest_rising":         fastest_up["name"],
+            "fastest_cooling":        fastest_dn["name"],
+            "most_polarized":         most_polarized["name"],
+            "top_national_narrative": top_nar,
+            "as_of":                  now.isoformat(),
+            "total_signals":          sum(len(v) for v in store.signals.values()),
+        }
+
+    store.cache_built_at = now
+    print(f"[cache] Built at {now.isoformat()} — {len(store.cache_states or [])} states cached")
 
 
 # ============================================================================
@@ -495,7 +556,10 @@ async def serve_frontend():
 
 @app.get("/api/states")
 async def list_states():
-    """Lightweight data for every state — what the map heatmap reads."""
+    """Lightweight data for every state — served from cache for instant response."""
+    if store.cache_states:
+        return store.cache_states
+    # Cache miss — compute on the fly (first request before ingest completes)
     if not store.scores:
         await recompute_all_scores()
     return [
@@ -508,6 +572,7 @@ async def list_states():
             "dominant_narrative": s.get("dominant_narrative", "governance"),
         }
         for s in store.scores.values()
+        if isinstance(s, dict)
     ]
 
 
@@ -515,14 +580,18 @@ async def list_states():
 
 @app.get("/api/state/{name}")
 async def state_detail(name: str):
-    # Try to find state (case-insensitive)
     matched = next((s for s in INDIAN_STATES if s.lower() == name.lower()), None)
     if not matched:
         raise HTTPException(status_code=404, detail=f"State '{name}' not found")
+    # Serve from cache if available
+    if matched in store.cache_state_detail:
+        return store.cache_state_detail[matched]
+    # Cache miss — compute and store
     score = store.scores.get(matched)
     if not score:
         score = await recompute_state_score(matched)
         store.scores[matched] = score
+    store.cache_state_detail[matched] = score
     return score
 
 
@@ -530,28 +599,30 @@ async def state_detail(name: str):
 
 @app.get("/api/snapshot/daily")
 async def daily_snapshot():
+    # Serve from cache for instant response
+    if store.cache_snapshot:
+        return store.cache_snapshot
     if not store.scores:
         return {"error": "no data yet — ingestion in progress, try again in ~60s"}
-    scored = list(store.scores.values())
-    hottest    = max(scored, key=lambda s: s["attention"])
-    coolest    = min(scored, key=lambda s: s["attention"])
+    # Build on the fly if cache not ready
+    scored = [s for s in store.scores.values() if isinstance(s, dict)]
+    if not scored:
+        return {"error": "no data yet"}
+    hottest    = max(scored, key=lambda s: s.get("attention", 0))
+    coolest    = min(scored, key=lambda s: s.get("attention", 0))
     fastest_up = max(scored, key=lambda s: s.get("delta_24h", 0))
     fastest_dn = min(scored, key=lambda s: s.get("delta_24h", 0))
-
-    # Most polarized: highest emotional intensity (min emotion dominates least)
     def polarization(s):
         emos = list(s.get("emotions", {}).values())
         return max(emos) - min(emos) if emos else 0
-
     most_polarized = max(scored, key=polarization)
-
     return {
-        "hottest_state":      hottest["name"],
-        "hottest_score":      hottest["attention"],
-        "coolest_state":      coolest["name"],
-        "fastest_rising":     fastest_up["name"],
-        "fastest_cooling":    fastest_dn["name"],
-        "most_polarized":     most_polarized["name"],
+        "hottest_state":          hottest["name"],
+        "hottest_score":          hottest.get("attention"),
+        "coolest_state":          coolest["name"],
+        "fastest_rising":         fastest_up["name"],
+        "fastest_cooling":        fastest_dn["name"],
+        "most_polarized":         most_polarized["name"],
         "top_national_narrative": (
             max(
                 {n["name"]: n["val"] for s in scored for n in s.get("narratives", [])}.items(),
@@ -582,6 +653,8 @@ def health():
         "status": "ok",
         "openai_configured": HAS_OPENAI,
         "last_ingest": store.last_ingest.isoformat() if store.last_ingest else None,
+        "cache_built_at": store.cache_built_at.isoformat() if store.cache_built_at else None,
+        "cache_states_count": len(store.cache_states) if store.cache_states else 0,
         "ingest_running": store.ingest_running,
         "total_signals": sum(len(v) for v in store.signals.values()),
         "states_with_data": sum(1 for v in store.signals.values() if v),
