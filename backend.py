@@ -157,9 +157,9 @@ class Store:
         if state not in self.signals:
             self.signals[state] = []
         self.signals[state].append(sig)
-        cutoff = datetime.now(timezone.utc) - timedelta(days=7)
+        cutoff = datetime.now(timezone.utc) - timedelta(days=14)
         self.signals[state] = [
-            s for s in self.signals[state][-600:]
+            s for s in self.signals[state][-1000:]
             if s.get("published_at", datetime.now(timezone.utc)) > cutoff
         ]
         return True
@@ -285,11 +285,33 @@ def build_rss_url(state: str, lang_code: str) -> str:
         f"q={query}&hl={lang_code}&gl=IN&ceid=IN:{lang_code.split('-')[0]}"
     )
 
+# Multiple search angles per state for richer signal coverage
+STATE_QUERY_ANGLES = [
+    "{state} politics government",
+    "{state} news today",
+    "{state} economy development",
+]
+
 async def ingest_state(client: httpx.AsyncClient, state: str) -> int:
     added = 0
     urls_tried = set()
-    for lang_code in LANG_CODES[:2]:  # 2 langs for speed
-        url = build_rss_url(state, lang_code)
+
+    # Build multiple query URLs for this state
+    queries = [
+        STATE_SEARCH_TERMS.get(state, f"{state} politics government"),
+        f"{state} news",
+        f"{state} latest",
+    ]
+    # Add state capital/city specific query if we have aliases
+    aliases = STATE_ALIASES.get(state, [])
+    if len(aliases) > 1:
+        queries.append(aliases[1] + " news")  # city name
+
+    for query in queries[:3]:  # max 3 queries per state
+        url = (
+            f"https://news.google.com/rss/search?"
+            f"q={query.replace(' ', '+')}&hl=en-IN&gl=IN&ceid=IN:en"
+        )
         if url in urls_tried:
             continue
         urls_tried.add(url)
@@ -297,10 +319,10 @@ async def ingest_state(client: httpx.AsyncClient, state: str) -> int:
             r = await client.get(url)
             feed = feedparser.parse(r.text)
         except Exception as e:
-            print(f"[ingest] {state}/{lang_code} fetch error: {e}")
+            print(f"[ingest] {state} fetch error: {e}")
             continue
 
-        for entry in feed.entries[:8]:
+        for entry in feed.entries[:10]:
             title = entry.get("title", "")
             body = entry.get("summary", "")
             source_url = entry.get("link", "")
@@ -309,7 +331,7 @@ async def ingest_state(client: httpx.AsyncClient, state: str) -> int:
 
             text = f"{title} {body}"
             tagged = geotag_states(text)
-            # Also always add to the queried state even if not geo-matched
+            # Always include the queried state
             tagged = list(set(tagged + [state]))
 
             try:
@@ -326,7 +348,7 @@ async def ingest_state(client: httpx.AsyncClient, state: str) -> int:
                 "source_url": source_url,
                 "title": title,
                 "body": body[:400],
-                "language": lang_code.split("-")[0],
+                "language": "en",
                 "published_at": pub,
                 "narratives": narratives,
                 "emotions": emotions,
@@ -353,7 +375,7 @@ async def run_ingest(states: list[str] | None = None) -> int:
             headers={"User-Agent": "IndiaAttentionMap/1.0 (research)"},
             follow_redirects=True,
         ) as client:
-            sem = asyncio.Semaphore(10)
+            sem = asyncio.Semaphore(12)
             async def with_sem(s):
                 async with sem:
                     return await ingest_state(client, s)
