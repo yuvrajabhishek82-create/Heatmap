@@ -264,18 +264,42 @@ async def ai_summary(state: str, headlines: list[str], attention: float) -> str:
 # RSS INGESTION
 # ============================================================================
 
+# State-specific RSS queries for better signal coverage
+STATE_QUERIES: dict[str, list[str]] = {
+    "Nagaland":          ["Nagaland Naga ceasefire Kohima", "Nagaland government NSCN"],
+    "Mizoram":           ["Mizoram Aizawl governance", "Mizoram Myanmar refugee"],
+    "Meghalaya":         ["Meghalaya Shillong NPP", "Meghalaya coal mining environment"],
+    "Tripura":           ["Tripura Agartala BJP politics", "Tripura Bangladesh border"],
+    "Manipur":           ["Manipur ethnic conflict Meitei Kuki", "Manipur Imphal violence"],
+    "Arunachal Pradesh": ["Arunachal Pradesh China LAC border", "Arunachal Pradesh governance"],
+    "Sikkim":            ["Sikkim Gangtok flood", "Sikkim SKM government"],
+    "Assam":             ["Assam flood Brahmaputra", "Assam NRC Guwahati politics"],
+    "Gujarat":           ["Gujarat economy investment Ahmedabad", "Gujarat BJP politics"],
+    "Goa":               ["Goa tourism mining politics", "Goa governance Panaji"],
+}
+
+def build_rss_urls(state: str) -> list[str]:
+    """Return 2-3 targeted RSS URLs for a state."""
+    queries = STATE_QUERIES.get(state, [
+        f"{state} politics government news",
+        f"{state} latest news today",
+    ])
+    return [
+        f"https://news.google.com/rss/search?q={q.replace(' ', '+')}&hl=en-IN&gl=IN&ceid=IN:en"
+        for q in queries[:2]
+    ]
+
 def build_rss_url(state: str, lang_code: str) -> str:
+    """Legacy single URL — used as fallback."""
     query = state.replace(" ", "+") + "+politics+news"
-    return (
-        f"https://news.google.com/rss/search?"
-        f"q={query}&hl={lang_code}&gl=IN&ceid=IN:{lang_code.split('-')[0]}"
-    )
+    return f"https://news.google.com/rss/search?q={query}&hl={lang_code}&gl=IN&ceid=IN:{lang_code.split('-')[0]}"
 
 async def ingest_state(client: httpx.AsyncClient, state: str) -> int:
     added = 0
-    urls_tried = set()
-    for lang_code in LANG_CODES[:2]:  # limit to 2 langs to stay polite
-        url = build_rss_url(state, lang_code)
+    urls_tried: set[str] = set()
+    rss_urls = build_rss_urls(state)
+
+    for url in rss_urls:
         if url in urls_tried:
             continue
         urls_tried.add(url)
@@ -283,7 +307,7 @@ async def ingest_state(client: httpx.AsyncClient, state: str) -> int:
             r = await client.get(url)
             feed = feedparser.parse(r.text)
         except Exception as e:
-            print(f"[ingest] {state}/{lang_code} fetch error: {e}")
+            print(f"[ingest] {state} fetch error: {e}")
             continue
 
         for entry in feed.entries[:12]:
@@ -312,7 +336,7 @@ async def ingest_state(client: httpx.AsyncClient, state: str) -> int:
                 "source_url": source_url,
                 "title": title,
                 "body": body[:400],
-                "language": lang_code.split("-")[0],
+                "language": "en",
                 "published_at": pub,
                 "narratives": narratives,
                 "emotions": emotions,
@@ -335,11 +359,11 @@ async def run_ingest(states: list[str] | None = None) -> int:
     total = 0
     try:
         async with httpx.AsyncClient(
-            timeout=25,
+            timeout=12,
             headers={"User-Agent": "IndiaAttentionMap/1.0 (research)"},
             follow_redirects=True,
         ) as client:
-            sem = asyncio.Semaphore(4)
+            sem = asyncio.Semaphore(10)
             async def with_sem(s):
                 async with sem:
                     return await ingest_state(client, s)
@@ -502,11 +526,20 @@ app.add_middleware(
 )
 
 
+async def continuous_ingest():
+    """Run full ingest on startup then every 15 minutes."""
+    while True:
+        try:
+            print(f"[continuous] Starting full ingest cycle")
+            await run_ingest(states=INDIAN_STATES)
+        except Exception as e:
+            print(f"[continuous] Error: {e}")
+        await asyncio.sleep(900)  # 15 minutes
+
 @app.on_event("startup")
 async def startup():
-    print("[startup] India Attention Map backend starting...")
-    # Kick off first ingestion in background so server is immediately available
-    asyncio.create_task(run_ingest())
+    print("[startup] Pulse of India backend starting...")
+    asyncio.create_task(continuous_ingest())
 
 
 # ── Serve frontend ──────────────────────────────────────────────────────────
