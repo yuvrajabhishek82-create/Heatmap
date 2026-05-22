@@ -349,11 +349,11 @@ async def run_ingest(states: list[str] | None = None) -> int:
     total = 0
     try:
         async with httpx.AsyncClient(
-            timeout=12,
+            timeout=10,
             headers={"User-Agent": "IndiaAttentionMap/1.0 (research)"},
             follow_redirects=True,
         ) as client:
-            sem = asyncio.Semaphore(8)
+            sem = asyncio.Semaphore(10)
             async def with_sem(s):
                 async with sem:
                     return await ingest_state(client, s)
@@ -586,24 +586,15 @@ async def run_ingest_batch():
     return count
 
 async def continuous_ingest():
-    """Run all 3 batches back-to-back on startup, then repeat every 15 min."""
-    # First pass: run all 3 batches immediately so cache is populated fast
-    for i in range(len(INGEST_BATCHES)):
-        try:
-            await run_ingest_batch()
-        except Exception as e:
-            print(f"[continuous] Batch error: {e}")
-        await asyncio.sleep(5)  # tiny pause between batches
-
-    # Subsequent passes: full cycle every 15 minutes
+    """Ingest all states in parallel on startup, then refresh every 15 min."""
     while True:
-        await asyncio.sleep(900)  # 15 min
-        for i in range(len(INGEST_BATCHES)):
-            try:
-                await run_ingest_batch()
-            except Exception as e:
-                print(f"[continuous] Error: {e}")
-            await asyncio.sleep(5)
+        try:
+            # Run ALL states at once in parallel (semaphore limits concurrency)
+            print(f"[ingest] Starting full parallel ingest — {len(INDIAN_STATES)} states")
+            await run_ingest(states=INDIAN_STATES)
+        except Exception as e:
+            print(f"[continuous] Error: {e}")
+        await asyncio.sleep(900)  # 15 min between full cycles
 
 @app.on_event("startup")
 async def startup():
