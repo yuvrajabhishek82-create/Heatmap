@@ -900,6 +900,23 @@ async def save_signals_to_db_bulk():
         await save_signals_to_db(state, signals)
 
 
+async def self_ping():
+    """Ping own health endpoint every 10 min to keep Render free tier alive."""
+    app_url = os.getenv("RENDER_EXTERNAL_URL", "")
+    if not app_url:
+        print("[ping] RENDER_EXTERNAL_URL not set — self-ping disabled")
+        return
+    await asyncio.sleep(60)  # wait for server to be ready
+    while True:
+        try:
+            async with httpx.AsyncClient(timeout=10) as client:
+                await client.get(f"{app_url}/api/health")
+            print("[ping] Self-ping OK")
+        except Exception as e:
+            print(f"[ping] Self-ping failed: {e}")
+        await asyncio.sleep(600)  # every 10 minutes
+
+
 async def continuous_ingest():
     """Run full ingest on startup then every 15 minutes."""
     while True:
@@ -931,6 +948,7 @@ async def startup():
     # 3. Start continuous ingest (also triggers backfill on first run)
     asyncio.create_task(continuous_ingest())
     asyncio.create_task(startup_backfill())
+    asyncio.create_task(self_ping())
 
 async def startup_backfill():
     """Run backfill after a short delay to not block startup."""
