@@ -297,7 +297,7 @@ async def ingest_state(client: httpx.AsyncClient, state: str) -> int:
                 "source_url": source_url,
                 "title": title,
                 "body": body[:400],
-                "language": lang_code.split("-")[0],
+                "language": "en",
                 "published_at": pub,
                 "narratives": narratives,
                 "emotions": emotions,
