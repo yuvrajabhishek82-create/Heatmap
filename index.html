@@ -502,55 +502,58 @@ body::before{
 </div>
 
 <!-- LIVE STATS STRIP -->
-<div id="stats-strip" style="
+<style>
+.stats-strip{
   position:relative;z-index:2;
-  background:rgba(9,13,21,0.9);
-  border-bottom:1px solid rgba(160,190,230,0.08);
-  padding:0 36px;
+  background:rgba(9,13,21,0.95);
+  border-bottom:1px solid rgba(160,190,230,0.07);
   display:flex;align-items:stretch;
-">
-  <div class="stat-cell" id="sc-signals">
+  overflow:hidden;
+}
+.stat-cell{
+  flex:1;padding:8px 20px;display:flex;flex-direction:column;justify-content:center;gap:1px;
+  transition:background 0.15s;min-width:0;
+}
+.stat-cell:hover{background:rgba(255,255,255,0.025)}
+.stat-cell.clickable{cursor:pointer}
+.stat-div{width:1px;background:rgba(160,190,230,0.06);flex-shrink:0;margin:6px 0}
+.sc-label{font-family:var(--mono);font-size:7.5px;letter-spacing:0.2em;text-transform:uppercase;color:var(--faint);white-space:nowrap}
+.sc-val{font-family:var(--serif);font-size:15px;font-weight:400;letter-spacing:-0.01em;color:var(--ink);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sc-val.loading{color:var(--faint);font-family:var(--mono);font-size:11px;animation:scPulse 1.5s ease-in-out infinite}
+@keyframes scPulse{0%,100%{opacity:0.3}50%{opacity:0.7}}
+.sc-sub{font-family:var(--mono);font-size:9px;color:var(--faint);margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+</style>
+<div class="stats-strip">
+  <div class="stat-cell">
     <div class="sc-label">Signals tracked</div>
-    <div class="sc-val" id="sc-signals-val">—</div>
-    <div class="sc-sub">Live ingestion</div>
+    <div class="sc-val loading" id="sc-signals-val">ingesting…</div>
+    <div class="sc-sub">Live collection</div>
   </div>
   <div class="stat-div"></div>
-  <div class="stat-cell" id="sc-hottest" style="cursor:pointer" onclick="selectHottest()">
+  <div class="stat-cell clickable" onclick="selectHottest()">
     <div class="sc-label">Highest attention</div>
-    <div class="sc-val" id="sc-hottest-val">—</div>
+    <div class="sc-val loading" id="sc-hottest-val">loading…</div>
     <div class="sc-sub" id="sc-hottest-sub">Click to explore</div>
   </div>
   <div class="stat-div"></div>
   <div class="stat-cell">
-    <div class="sc-label">Peak anger state</div>
-    <div class="sc-val" id="sc-anger-val">—</div>
-    <div class="sc-sub" id="sc-anger-sub">Outrage & protest signals</div>
+    <div class="sc-label">Peak anger</div>
+    <div class="sc-val loading" id="sc-anger-val">loading…</div>
+    <div class="sc-sub" id="sc-anger-sub">Outrage signals</div>
   </div>
   <div class="stat-div"></div>
   <div class="stat-cell">
-    <div class="sc-label">Top rising narrative</div>
-    <div class="sc-val" id="sc-narrative-val">—</div>
-    <div class="sc-sub" id="sc-narrative-sub">National signal surge</div>
+    <div class="sc-label">Rising narrative</div>
+    <div class="sc-val loading" id="sc-narrative-val">loading…</div>
+    <div class="sc-sub">National surge</div>
   </div>
   <div class="stat-div"></div>
   <div class="stat-cell">
-    <div class="sc-label">Fastest cooling</div>
-    <div class="sc-val" id="sc-cooling-val">—</div>
-    <div class="sc-sub" id="sc-cooling-sub">Signal decay</div>
+    <div class="sc-label">Cooling fastest</div>
+    <div class="sc-val loading" id="sc-cooling-val">loading…</div>
+    <div class="sc-sub">Signal decay</div>
   </div>
 </div>
-
-<style>
-.stat-cell{
-  flex:1;padding:10px 16px;display:flex;flex-direction:column;justify-content:center;gap:2px;
-  transition:background 0.15s;
-}
-.stat-cell:hover{background:rgba(255,255,255,0.02)}
-.stat-div{width:1px;background:rgba(160,190,230,0.07);flex-shrink:0;margin:8px 0}
-.sc-label{font-family:var(--mono);font-size:8px;letter-spacing:0.2em;text-transform:uppercase;color:var(--faint)}
-.sc-val{font-family:var(--serif);font-size:18px;font-weight:400;letter-spacing:-0.01em;color:var(--ink);margin-top:1px}
-.sc-sub{font-family:var(--mono);font-size:9px;color:var(--faint);margin-top:1px}
-</style>
 
 <!-- HERO -->
 <section class="hero" style="padding-bottom:0">
@@ -741,7 +744,14 @@ async function fetchSnap(){
   }catch(e){}
 }
 
-function setText(id,val){var el=document.getElementById(id);if(el)el.textContent=val;}
+function setText(id,val){
+  var el=document.getElementById(id);
+  if(!el) return;
+  el.textContent=val;
+  if(val&&val!=='—'&&val!=='loading…'&&val!=='ingesting…'){
+    el.classList.remove('loading');
+  }
+}
 
 function updateStripNarrative(){
   var nc={};
@@ -1001,16 +1011,22 @@ var DEFAULT={
 function g(n){return SD[n]||Object.assign({},DEFAULT);}
 
 function aC(s){
-  if(s<8)  return '#0a1520';
-  if(s<15) return '#0e2a45';
-  if(s<22) return '#0d4070';
-  if(s<30) return '#0c5890';
-  if(s<38) return '#0d70aa';
-  if(s<46) return '#208888';
-  if(s<54) return '#c87a10';
-  if(s<62) return '#e05010';
-  if(s<72) return '#d82010';
-  if(s<82) return '#cc0808';
+  // Dynamic scale: always spread full color range across actual data
+  // Get min/max from current SD to normalize
+  var scores=Object.values(SD).map(function(d){return d.attention||0;});
+  var mn=Math.min.apply(null,scores);
+  var mx=Math.max.apply(null,scores)||1;
+  // Normalize 0-1
+  var n=Math.max(0,Math.min(1,(s-mn)/(mx-mn)));
+  // Map to color stops: dark blue → teal → amber → orange → red
+  if(n<0.12) return '#0d1e30';
+  if(n<0.25) return '#0e3d6a';
+  if(n<0.38) return '#0d5f90';
+  if(n<0.50) return '#0e7aaa';
+  if(n<0.62) return '#1a9090';
+  if(n<0.72) return '#c87010';
+  if(n<0.82) return '#d84010';
+  if(n<0.92) return '#cc1808';
   return '#ff0010';
 }
 function eC(e){
@@ -1142,7 +1158,12 @@ function applyLayer(){
     else if(layer==='emotion') fill=eC(d.emotions);
     else fill=vC(d.velocity);
     p.setAttribute('fill',fill);
-    p.setAttribute('fill-opacity',layer==='attention'?Math.max(0.25, Math.min(1.0, 0.2+d.attention/70)):0.85);
+    (function(){
+      var scores=Object.values(SD).map(function(x){return x.attention||0;});
+      var mn=Math.min.apply(null,scores),mx=Math.max.apply(null,scores)||1;
+      var n=Math.max(0,Math.min(1,(d.attention-mn)/(mx-mn)));
+      p.setAttribute('fill-opacity',layer==='attention'?Math.max(0.3,0.3+n*0.7):0.85);
+    })();
   });
 }
 
@@ -1205,138 +1226,285 @@ function select_(nm){
 
 function renderPanel(nm){
   var d=g(nm),panel=document.getElementById('state-detail');
-  var isFav=FAVS.has(nm),dS=d.delta>=0?'+':'',dC=d.delta>=0?'up':'dn';
+  var isFav=FAVS.has(nm);
   var pal={anxiety:'#8844cc',anger:'#dd2244',hope:'#33cc66',pride:'#33aacc',fear:'#cc8833'};
-  var emotions=d.emotions&&Object.keys(d.emotions).length?d.emotions:{anxiety:20,anger:15,hope:25,pride:25,fear:15};
-  var eL=Object.entries(emotions);
-  // Normalize: API may return 0-1 floats OR 0-100 integers
-  var rawTot=eL.reduce(function(s,kv){return s+kv[1];},0);
-  if(rawTot>0 && rawTot<=1.01){ eL=eL.map(function(kv){return [kv[0],Math.round(kv[1]*100)];}); }
-  var tot=Math.max(1,eL.reduce(function(s,kv){return s+kv[1];},0));
-  var cumA=-Math.PI/2,cx=38,cy=38,R=33,ri=20;
-  var arcs=eL.map(function(kv){
-    var k=kv[0],v=kv[1],fr=v/tot,a1=cumA,a2=cumA+fr*Math.PI*2;
-    cumA=a2;var lg=(a2-a1)>Math.PI?1:0;
-    var x1=cx+Math.cos(a1)*R,y1=cy+Math.sin(a1)*R,x2=cx+Math.cos(a2)*R,y2=cy+Math.sin(a2)*R;
-    var x3=cx+Math.cos(a2)*ri,y3=cy+Math.sin(a2)*ri,x4=cx+Math.cos(a1)*ri,y4=cy+Math.sin(a1)*ri;
-    return '<path d="M'+x1.toFixed(1)+','+y1.toFixed(1)+' A'+R+','+R+' 0 '+lg+' 1 '+x2.toFixed(1)+','+y2.toFixed(1)+' L'+x3.toFixed(1)+','+y3.toFixed(1)+' A'+ri+','+ri+' 0 '+lg+' 0 '+x4.toFixed(1)+','+y4.toFixed(1)+' Z" fill="'+pal[k]+'" opacity="0.9"/>';
-  }).join('');
 
-  var tl=d.timeline,tmn=Math.min.apply(null,tl),tmx=Math.max.apply(null,tl),tr=Math.max(1,tmx-tmn);
-  var tw=260,th=62,tp=5;
-  var pts=tl.map(function(v,i){return [tp+(i/(tl.length-1))*(tw-tp*2),tp+(1-(v-tmn)/tr)*(th-tp*2)];});
-  var pD=pts.map(function(p,i){return (i===0?'M':'L')+p[0].toFixed(1)+','+p[1].toFixed(1);}).join('');
-  var aD=pD+' L'+pts[pts.length-1][0]+','+(th-tp)+' L'+pts[0][0]+','+(th-tp)+' Z';
-  var ac=aC(d.attention);
-
-  var hist=d.narrativeHistory||[];
-
-  panel.innerHTML=
+  // Header — always shown
+  var header=
     '<div class="sp-head">'+
-      '<div><div class="sp-ek">Narrative panel</div><div class="sp-name">'+nm+'</div></div>'+
-      '<button class="fav-btn '+(isFav?'on':'')+'" onclick="toggleFav(\''+nm+'\')" title="Track">'+
-        '<svg viewBox="0 0 24 24" fill="'+(isFav?'currentColor':'none')+'" stroke="currentColor" stroke-width="1.5"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>'+
+      '<div><div class="sp-ek">'+
+        (layer==='attention'?'Narrative panel':layer==='emotion'?'Emotional register':'Momentum panel')+
+      '</div><div class="sp-name">'+nm+'</div></div>'+
+      '<button class="fav-btn '+(FAVS.has(nm)?'on':'')+'" onclick="toggleFav(''+nm+'')" title="Track">'+
+        '<svg viewBox="0 0 24 24" fill="'+(FAVS.has(nm)?'currentColor':'none')+'" stroke="currentColor" stroke-width="1.5"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>'+
       '</button>'+
-    '</div>'+
+    '</div>';
 
-    // Narrative history timeline — signature feature
-    (hist.length?
-      '<div class="nar-timeline">'+
-        '<div class="nt-label">Narrative evolution</div>'+
-        '<div class="nt-flow">'+
-          hist.map(function(h){
-            return '<div class="nt-step '+h.cls+'">'+
-              '<div class="nt-dot"></div>'+
-              '<div class="nt-content">'+
-                '<div class="nt-topic">'+h.topic+'</div>'+
-                '<div class="nt-when">'+h.when+'</div>'+
+  var body = '';
+
+  // ── ATTENTION LAYER ──────────────────────────────────────
+  if(layer==='attention'){
+    var dS=d.delta>=0?'+':'',dC=d.delta>=0?'up':'dn';
+    var hist=d.narrativeHistory||[];
+    var tl=d.timeline||[20,20,20,20,20,20,20,20];
+    var tmn=Math.min.apply(null,tl),tmx=Math.max.apply(null,tl),tr=Math.max(1,tmx-tmn);
+    var tw=260,th=62,tp=5;
+    var pts=tl.map(function(v,i){return [tp+(i/(tl.length-1))*(tw-tp*2),tp+(1-(v-tmn)/tr)*(th-tp*2)];});
+    var pD=pts.map(function(p,i){return (i===0?'M':'L')+p[0].toFixed(1)+','+p[1].toFixed(1);}).join('');
+    var aD=pD+' L'+pts[pts.length-1][0]+','+(th-tp)+' L'+pts[0][0]+','+(th-tp)+' Z';
+    var ac=aC(d.attention);
+
+    body+=
+      // Narrative evolution timeline
+      (hist.length?
+        '<div class="nar-timeline">'+
+          '<div class="nt-label">Narrative evolution</div>'+
+          '<div class="nt-flow">'+
+            hist.map(function(h){
+              return '<div class="nt-step '+h.cls+'">'+
+                '<div class="nt-dot"></div>'+
+                '<div class="nt-content">'+
+                  '<div class="nt-topic">'+h.topic+'</div>'+
+                  '<div class="nt-when">'+h.when+'</div>'+
+                '</div>'+
+              '</div>';
+            }).join('')+
+          '</div>'+
+        '</div>':'')+
+
+      '<div class="insight">'+d.summary+'</div>'+
+
+      '<div class="score-strip">'+
+        '<div class="ss-item"><div class="ss-label">Attention</div><div class="ss-val">'+d.attention+'</div></div>'+
+        '<div class="ss-divider"></div>'+
+        '<div class="ss-item"><div class="ss-label">24h shift</div><div class="ss-delta '+dC+'">'+dS+d.delta+'</div></div>'+
+        '<div class="ss-divider"></div>'+
+        '<div class="ss-item"><div class="ss-label">Top narrative</div><div class="ss-nar">'+(d.narratives&&d.narratives[0]?d.narratives[0].name.charAt(0).toUpperCase()+d.narratives[0].name.slice(1):'—')+'</div></div>'+
+      '</div>'+
+
+      '<div class="sp-section">'+
+        '<div class="sp-sec-title">Narrative breakdown</div>'+
+        (d.narratives&&d.narratives.length?
+          '<div class="nar-list">'+
+          d.narratives.map(function(n){
+            var nm2=n.name?n.name.charAt(0).toUpperCase()+n.name.slice(1):n.name;
+            var val=typeof n.val==='number'?n.val:0;
+            return '<div class="nar-item2">'+
+              '<div class="ni-label">'+nm2+(n.dir==='up'?' <span style="color:#e05a28;font-size:9px">↑</span>':n.dir==='down'?' <span style="color:#3bb8d8;font-size:9px">↓</span>':'')+'</div>'+
+              '<div class="ni-val">'+val.toFixed(1)+'%</div>'+
+              '<div class="ni-track"><div class="ni-fill" style="width:'+Math.min(100,val*2.5)+'%;background:'+(n.dir==='up'?'#e05a28':n.dir==='down'?'#3bb8d8':'#334455')+'"></div></div>'+
+            '</div>';
+          }).join('')+
+          '</div>':
+          '<div style="color:var(--faint);font-family:var(--mono);font-size:10px;padding:8px 0;line-height:1.6">Low-signal region. Regional language sources are being monitored.</div>')+
+      '</div>'+
+
+      '<div class="sp-section">'+
+        '<div class="sp-sec-title">Narrative movement</div>'+
+        '<div class="mv-grid">'+
+          '<div class="mv-block up"><div class="mv-h">Rising</div>'+
+            (d.rising&&d.rising.length?d.rising.map(function(r){return '<div class="mv-it"><strong>'+r.t+'</strong><span>'+r.pct+'</span></div>';}).join(''):'<div class="mv-it" style="color:var(--faint)">Stable</div>')+
+          '</div>'+
+          '<div class="mv-block dn"><div class="mv-h">Falling</div>'+
+            (d.falling&&d.falling.length?d.falling.map(function(r){return '<div class="mv-it"><strong>'+r.t+'</strong><span>'+r.pct+'</span></div>';}).join(''):'<div class="mv-it" style="color:var(--faint)">Stable</div>')+
+          '</div>'+
+        '</div>'+
+      '</div>'+
+
+      '<div class="sp-section">'+
+        '<div class="sp-sec-title">Attention — 8 days</div>'+
+        '<div class="tl-wrap">'+
+          '<svg viewBox="0 0 '+tw+' '+th+'" style="width:100%;height:100%">'+
+            '<defs><linearGradient id="tlg'+nm.replace(/[^a-z]/gi,'')+'" x1="0" x2="0" y1="0" y2="1">'+
+              '<stop offset="0%" stop-color="'+ac+'" stop-opacity="0.25"/>'+
+              '<stop offset="100%" stop-color="'+ac+'" stop-opacity="0"/>'+
+            '</linearGradient></defs>'+
+            '<path d="'+aD+'" fill="url(#tlg'+nm.replace(/[^a-z]/gi,'')+')"/>'+
+            '<path d="'+pD+'" fill="none" stroke="'+ac+'" stroke-width="1.2"/>'+
+            pts.map(function(p,i){return '<circle cx="'+p[0]+'" cy="'+p[1]+'" r="'+(i===pts.length-1?2.2:1.2)+'" fill="'+ac+'"/>';}).join('')+
+          '</svg>'+
+        '</div>'+
+      '</div>'+
+
+      '<div class="sp-section">'+
+        '<div class="sp-sec-title">Signals <span style="color:var(--faint)">'+((d.articles&&d.articles.length)||0)+'</span></div>'+
+        '<div class="art-list">'+
+          (d.articles&&d.articles.length?
+            d.articles.map(function(a){return '<div class="art-item"><div class="art-src">'+a.src+'</div><div class="art-txt">'+a.txt+'</div></div>';}).join(''):
+            '<div style="color:var(--faint);font-family:var(--mono);font-size:10px;padding:6px 0">No articles yet for this state.</div>')+
+        '</div>'+
+      '</div>';
+
+  // ── EMOTION LAYER ────────────────────────────────────────
+  } else if(layer==='emotion'){
+    var emotions=d.emotions&&Object.keys(d.emotions).length?d.emotions:{anxiety:20,anger:15,hope:25,pride:25,fear:15};
+    var eL=Object.entries(emotions);
+    var rawTot=eL.reduce(function(s,kv){return s+kv[1];},0);
+    if(rawTot>0&&rawTot<=1.01){ eL=eL.map(function(kv){return [kv[0],Math.round(kv[1]*100)];}); }
+    var tot=Math.max(1,eL.reduce(function(s,kv){return s+kv[1];},0));
+    eL.sort(function(a,b){return b[1]-a[1];});
+    var domEmo=eL[0][0];
+    var domPct=Math.round(eL[0][1]*100/tot);
+
+    // Donut
+    var cumA=-Math.PI/2,cx=38,cy=38,R=33,ri=20;
+    var arcs=eL.map(function(kv){
+      var k=kv[0],v=kv[1],fr=v/tot,a1=cumA,a2=cumA+fr*Math.PI*2;
+      cumA=a2;var lg=(a2-a1)>Math.PI?1:0;
+      var x1=cx+Math.cos(a1)*R,y1=cy+Math.sin(a1)*R,x2=cx+Math.cos(a2)*R,y2=cy+Math.sin(a2)*R;
+      var x3=cx+Math.cos(a2)*ri,y3=cy+Math.sin(a2)*ri,x4=cx+Math.cos(a1)*ri,y4=cy+Math.sin(a1)*ri;
+      return '<path d="M'+x1.toFixed(1)+','+y1.toFixed(1)+' A'+R+','+R+' 0 '+lg+' 1 '+x2.toFixed(1)+','+y2.toFixed(1)+' L'+x3.toFixed(1)+','+y3.toFixed(1)+' A'+ri+','+ri+' 0 '+lg+' 0 '+x4.toFixed(1)+','+y4.toFixed(1)+' Z" fill="'+pal[k]+'" opacity="0.9"/>';
+    }).join('');
+
+    var desc={anxiety:'Uncertainty, worry, unease about the future',anger:'Outrage, protest, demand for accountability',hope:'Optimism, progress, forward momentum',pride:'Achievement, identity, celebration',fear:'Threat perception, insecurity, danger signals'};
+    var whatItMeans={
+      anxiety:'The dominant tone suggests collective uncertainty. People are processing change without clarity on outcomes.',
+      anger:'High anger signals active public pressure — protests, demands, calls for accountability are dominant.',
+      hope:'Optimism is the primary register. Stories of progress and achievement are driving the narrative.',
+      pride:'Strong identity and achievement signals. The state is in a pride cycle — celebrations, milestones, wins.',
+      fear:'Threat perception is high. Security, danger, and insecurity narratives are dominating public attention.'
+    };
+
+    body+=
+      // Dominant emotion hero
+      '<div style="padding:14px;border-radius:10px;background:'+pal[domEmo]+'14;border:1px solid '+pal[domEmo]+'33;margin-bottom:14px;">'+
+        '<div style="font-family:var(--mono);font-size:8px;letter-spacing:0.2em;text-transform:uppercase;color:'+pal[domEmo]+';margin-bottom:6px;">Dominant emotion</div>'+
+        '<div style="font-family:var(--serif);font-size:26px;font-weight:300;color:var(--ink);letter-spacing:-0.02em;">'+domEmo.charAt(0).toUpperCase()+domEmo.slice(1)+'</div>'+
+        '<div style="font-family:var(--mono);font-size:10px;color:var(--dim);margin-top:4px;">'+domPct+'% of emotional signal</div>'+
+        '<div style="font-size:12px;color:var(--dim);margin-top:8px;line-height:1.5;font-style:italic;">'+whatItMeans[domEmo]+'</div>'+
+      '</div>'+
+
+      // Full breakdown
+      '<div class="sp-section">'+
+        '<div class="sp-sec-title">Emotional breakdown</div>'+
+        '<div style="display:flex;align-items:center;gap:16px;margin-bottom:14px;">'+
+          '<svg viewBox="0 0 76 76" style="width:76px;height:76px;flex-shrink:0;">'+arcs+'</svg>'+
+          '<div style="flex:1;display:flex;flex-direction:column;gap:6px;">'+
+            eL.map(function(kv){
+              var k=kv[0],v=kv[1],pct=Math.round(v*100/tot);
+              return '<div>'+
+                '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:2px;">'+
+                  '<div style="display:flex;align-items:center;gap:6px;">'+
+                    '<span style="width:7px;height:7px;border-radius:2px;background:'+pal[k]+';display:inline-block;flex-shrink:0;"></span>'+
+                    '<span style="font-size:11.5px;color:'+(k===domEmo?'var(--ink)':'var(--dim)')+';">'+k.charAt(0).toUpperCase()+k.slice(1)+'</span>'+
+                  '</div>'+
+                  '<span style="font-family:var(--mono);font-size:10.5px;color:var(--ink);">'+pct+'%</span>'+
+                '</div>'+
+                '<div style="height:2px;background:rgba(255,255,255,0.05);border-radius:1px;overflow:hidden;">'+
+                  '<div style="height:100%;width:'+pct+'%;background:'+pal[k]+';opacity:0.7;border-radius:1px;"></div>'+
+                '</div>'+
+                (k===domEmo?'<div style="font-family:var(--mono);font-size:8.5px;color:var(--faint);margin-top:2px;">'+desc[k]+'</div>':'')+
+              '</div>';
+            }).join('')+
+          '</div>'+
+        '</div>'+
+      '</div>'+
+
+      // What drives each emotion
+      '<div class="sp-section">'+
+        '<div class="sp-sec-title">Emotional drivers</div>'+
+        '<div style="display:flex;flex-direction:column;gap:8px;">'+
+          eL.slice(0,3).map(function(kv){
+            var k=kv[0],v=kv[1],pct=Math.round(v*100/tot);
+            var drivers={
+              anxiety:['Economic uncertainty','Policy ambiguity','Unresolved disputes'],
+              anger:['Corruption signals','Exam/scam outrage','Governance failures'],
+              hope:['Infrastructure wins','Investment announcements','Growth indicators'],
+              pride:['Cultural achievements','Sports victories','State milestones'],
+              fear:['Security incidents','Border tensions','Law & order signals']
+            };
+            var topNar=d.narratives&&d.narratives[0]?d.narratives[0].name:'governance';
+            return '<div style="padding:9px 12px;border-radius:7px;background:rgba(255,255,255,0.02);border:1px solid var(--border);">'+
+              '<div style="display:flex;align-items:center;gap:8px;margin-bottom:5px;">'+
+                '<span style="width:6px;height:6px;border-radius:50%;background:'+pal[k]+';flex-shrink:0;"></span>'+
+                '<span style="font-size:12px;color:var(--ink);font-weight:500;">'+k.charAt(0).toUpperCase()+k.slice(1)+'</span>'+
+                '<span style="font-family:var(--mono);font-size:10px;color:'+pal[k]+';margin-left:auto;">'+pct+'%</span>'+
               '</div>'+
+              '<div style="font-family:var(--mono);font-size:9px;color:var(--faint);line-height:1.6;">'+drivers[k].join(' · ')+'</div>'+
             '</div>';
           }).join('')+
         '</div>'+
-      '</div>':'')+
+      '</div>';
 
-    '<div class="insight">'+d.summary+'</div>'+
+  // ── MOMENTUM LAYER ───────────────────────────────────────
+  } else {
+    var vel=d.velocity||0;
+    var velDir=vel>0.15?'Rising fast':vel>0.05?'Rising':vel<-0.1?'Cooling fast':vel<-0.02?'Cooling':'Stable';
+    var velCol=vel>0.05?'#e05a28':vel<-0.02?'#3bb8d8':'#556677';
+    var velDesc={
+      'Rising fast':'Signal volume is surging. This state is entering a high-attention cycle — multiple narratives accelerating simultaneously.',
+      'Rising':'Attention is building steadily. A narrative is gaining traction and drawing more national coverage.',
+      'Stable':'Signal momentum is balanced. No significant acceleration or decay in the current cycle.',
+      'Cooling':'Attention is fading. A recent narrative spike is losing energy and coverage is declining.',
+      'Cooling fast':'Sharp signal decay. A major story has passed its peak and attention is moving elsewhere.'
+    };
 
-    '<div class="score-strip">'+
-      '<div class="ss-item"><div class="ss-label">Attention</div><div class="ss-val">'+d.attention+'</div></div>'+
-      '<div class="ss-divider"></div>'+
-      '<div class="ss-item"><div class="ss-label">24h shift</div><div class="ss-delta '+dC+'">'+dS+d.delta+'</div></div>'+
-      '<div class="ss-divider"></div>'+
-      '<div class="ss-item"><div class="ss-label">Top narrative</div><div class="ss-nar">'+(d.narratives[0]?d.narratives[0].name:'—')+'</div></div>'+
-    '</div>'+
+    // Velocity gauge arc
+    var gaugeVal=Math.max(-1,Math.min(1,vel*5)); // normalize to -1..1
+    var gAngle=(gaugeVal+1)/2*Math.PI; // 0..PI
+    var gx=60,gy=55,gR=40;
+    var gx1=gx+Math.cos(Math.PI)*gR,gy1=gy+Math.sin(Math.PI)*gR;
+    var gx2=gx+Math.cos(Math.PI-gAngle)*gR,gy2=gy+Math.sin(Math.PI-gAngle)*gR;
+    var needleX=gx+Math.cos(Math.PI-gAngle)*gR*0.75,needleY=gy+Math.sin(Math.PI-gAngle)*gR*0.75;
 
-    '<div class="sp-section">'+
-      '<div class="sp-sec-title">Narrative breakdown</div>'+
-      (d.narratives&&d.narratives.length?
-        '<div class="nar-list">'+
-        d.narratives.map(function(n){
-          var nm=n.name?n.name.charAt(0).toUpperCase()+n.name.slice(1):n.name;
-          var val=typeof n.val==='number'?n.val:0;
-          return '<div class="nar-item2">'+
-            '<div class="ni-label">'+nm+(n.dir==='up'?' <span style="color:#e05a28;font-size:9px">↑</span>':n.dir==='down'?' <span style="color:#3bb8d8;font-size:9px">↓</span>':'')+'</div>'+
-            '<div class="ni-val">'+val.toFixed(1)+'%</div>'+
-            '<div class="ni-track"><div class="ni-fill" style="width:'+Math.min(100,val*2.5)+'%;background:'+(n.dir==='up'?'#e05a28':n.dir==='down'?'#3bb8d8':'#334455')+'"></div></div>'+
-          '</div>';
-        }).join('')+
-        '</div>':
-        '<div style="color:var(--faint);font-family:var(--mono);font-size:10px;padding:8px 0;line-height:1.6">Low-signal region. National press coverage is limited for this state — regional language sources are being monitored.</div>')+
-    '</div>'+
-
-    '<div class="sp-section">'+
-      '<div class="sp-sec-title">Movement</div>'+
-      '<div class="mv-grid">'+
-        '<div class="mv-block up"><div class="mv-h">Rising</div>'+
-          (d.rising.length?d.rising.map(function(r){return '<div class="mv-it"><strong>'+r.t+'</strong><span>'+r.pct+'</span></div>';}).join(''):'<div class="mv-it" style="color:var(--faint)">Stable</div>')+
+    body+=
+      // Velocity hero
+      '<div style="padding:14px;border-radius:10px;background:'+velCol+'14;border:1px solid '+velCol+'33;margin-bottom:14px;">'+
+        '<div style="font-family:var(--mono);font-size:8px;letter-spacing:0.2em;text-transform:uppercase;color:'+velCol+';margin-bottom:6px;">Signal momentum</div>'+
+        '<div style="display:flex;align-items:baseline;gap:10px;">'+
+          '<div style="font-family:var(--serif);font-size:32px;font-weight:300;color:var(--ink);letter-spacing:-0.03em;">'+(vel>0?'+':'')+vel.toFixed(3)+'</div>'+
+          '<div style="font-size:14px;color:'+velCol+';font-weight:500;">'+velDir+'</div>'+
         '</div>'+
-        '<div class="mv-block dn"><div class="mv-h">Falling</div>'+
-          (d.falling.length?d.falling.map(function(r){return '<div class="mv-it"><strong>'+r.t+'</strong><span>'+r.pct+'</span></div>';}).join(''):'<div class="mv-it" style="color:var(--faint)">Stable</div>')+
-        '</div>'+
+        '<div style="font-size:12px;color:var(--dim);margin-top:8px;line-height:1.5;font-style:italic;">'+velDesc[velDir]+'</div>'+
       '</div>'+
-    '</div>'+
 
-    '<div class="sp-section">'+
-      '<div class="sp-sec-title">Emotional register</div>'+
-      '<div class="em-row">'+
-        '<svg class="em-donut" viewBox="0 0 76 76">'+arcs+'</svg>'+
-        '<div class="em-leg">'+
-          eL.sort(function(a,b){return b[1]-a[1];}).map(function(kv){
-            var k=kv[0],v=kv[1];
-            var desc={anxiety:'Uncertainty & worry',anger:'Outrage & protest',hope:'Optimism & growth',pride:'Achievement & identity',fear:'Threat perception'};
-            return '<div class="em-item" style="margin-bottom:1px">'+
-              '<span class="em-sw" style="background:'+pal[k]+'"></span>'+
-              '<span class="em-n">'+k.charAt(0).toUpperCase()+k.slice(1)+'</span>'+
-              '<span class="em-p">'+Math.round(v*100/tot)+'%</span>'+
-            '</div>'+
-            (v===eL.sort(function(a,b){return b[1]-a[1];})[0][1]?
-              '<div style="font-family:var(--mono);font-size:8.5px;color:var(--faint);padding:1px 0 4px 12px;border-left:1px solid '+pal[k]+';margin-left:3px;margin-bottom:3px;">'+desc[k]+'</div>':
-            '');
+      // 24h signal stats
+      '<div class="score-strip" style="margin-bottom:14px;">'+
+        '<div class="ss-item"><div class="ss-label">Velocity</div><div class="ss-val" style="font-size:18px;color:'+velCol+'">'+(vel>0?'+':'')+vel.toFixed(3)+'</div></div>'+
+        '<div class="ss-divider"></div>'+
+        '<div class="ss-item"><div class="ss-label">24h signal δ</div><div class="ss-delta '+(d.delta>=0?'up':'dn')+'">'+(d.delta>=0?'+':'')+d.delta+'</div></div>'+
+        '<div class="ss-divider"></div>'+
+        '<div class="ss-item"><div class="ss-label">Attention now</div><div class="ss-nar">'+d.attention+'</div></div>'+
+      '</div>'+
+
+      // Rising signals
+      '<div class="sp-section">'+
+        '<div class="sp-sec-title">What is accelerating</div>'+
+        (d.rising&&d.rising.length?
+          '<div style="display:flex;flex-direction:column;gap:6px;">'+
+          d.rising.map(function(r){
+            return '<div style="display:flex;align-items:center;justify-content:space-between;padding:8px 10px;border-radius:6px;background:rgba(224,90,40,0.05);border:1px solid rgba(224,90,40,0.15);">'+
+              '<span style="font-size:12px;color:var(--ink);font-weight:500;">'+r.t+'</span>'+
+              '<span style="font-family:var(--mono);font-size:10.5px;color:#e05a28;">'+r.pct+'</span>'+
+            '</div>';
           }).join('')+
-        '</div>'+
+          '</div>':
+          '<div style="color:var(--faint);font-family:var(--mono);font-size:10px;padding:6px 0;">No accelerating signals detected.</div>')+
       '</div>'+
-    '</div>'+
 
-    '<div class="sp-section">'+
-      '<div class="sp-sec-title">Attention — 8 days</div>'+
-      '<div class="tl-wrap">'+
-        '<svg viewBox="0 0 '+tw+' '+th+'" style="width:100%;height:100%">'+
-          '<defs><linearGradient id="tlg'+nm.replace(/[^a-z]/gi,'')+'" x1="0" x2="0" y1="0" y2="1">'+
-            '<stop offset="0%" stop-color="'+ac+'" stop-opacity="0.25"/>'+
-            '<stop offset="100%" stop-color="'+ac+'" stop-opacity="0"/>'+
-          '</linearGradient></defs>'+
-          '<path d="'+aD+'" fill="url(#tlg'+nm.replace(/[^a-z]/gi,'')+')"/>'+
-          '<path d="'+pD+'" fill="none" stroke="'+ac+'" stroke-width="1.2"/>'+
-          pts.map(function(p,i){return '<circle cx="'+p[0]+'" cy="'+p[1]+'" r="'+(i===pts.length-1?2.2:1.2)+'" fill="'+ac+'"/>';}).join('')+
-        '</svg>'+
+      // Falling signals
+      '<div class="sp-section">'+
+        '<div class="sp-sec-title">What is decelerating</div>'+
+        (d.falling&&d.falling.length?
+          '<div style="display:flex;flex-direction:column;gap:6px;">'+
+          d.falling.map(function(r){
+            return '<div style="display:flex;align-items:center;justify-content:space-between;padding:8px 10px;border-radius:6px;background:rgba(59,184,216,0.05);border:1px solid rgba(59,184,216,0.15);">'+
+              '<span style="font-size:12px;color:var(--ink);font-weight:500;">'+r.t+'</span>'+
+              '<span style="font-family:var(--mono);font-size:10.5px;color:#3bb8d8;">'+r.pct+'</span>'+
+            '</div>';
+          }).join('')+
+          '</div>':
+          '<div style="color:var(--faint);font-family:var(--mono);font-size:10px;padding:6px 0;">No decelerating signals detected.</div>')+
       '</div>'+
-    '</div>'+
 
-    '<div class="sp-section">'+
-      '<div class="sp-sec-title">Signals <span style="color:var(--faint)">'+d.articles.length+'</span></div>'+
-      '<div class="art-list">'+
-        d.articles.map(function(a){return '<div class="art-item"><div class="art-src">'+a.src+'</div><div class="art-txt">'+a.txt+'</div></div>';}).join('')+
-      '</div>'+
-    '</div>';
+      // Narrative context
+      '<div class="sp-section">'+
+        '<div class="sp-sec-title">Narrative context</div>'+
+        '<div class="insight" style="margin-bottom:0;">'+d.summary+'</div>'+
+      '</div>';
+  }
+
+  panel.innerHTML = header + body;
 }
 
 function toggleFav(nm){
@@ -1360,7 +1528,11 @@ function renderFavs(){
 document.querySelectorAll('.ltab').forEach(function(c){
   c.addEventListener('click',function(){
     document.querySelectorAll('.ltab').forEach(function(x){x.classList.remove('active');});
-    c.classList.add('active');layer=c.dataset.layer;applyLayer();
+    c.classList.add('active');
+    layer=c.dataset.layer;
+    applyLayer();
+    // Re-render state panel to show layer-specific details
+    if(SEL) renderPanel(SEL);
   });
 });
 
