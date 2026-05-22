@@ -3,413 +3,507 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>India Attention Map — Political Narrative Intelligence</title>
+<title>India Attention Map</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,400;9..144,500;9..144,600&family=JetBrains+Mono:wght@300;400;500&family=Inter+Tight:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,ital,wght@9..144,0,300;9..144,0,400;9..144,1,300;9..144,1,400&family=JetBrains+Mono:wght@300;400&family=Inter+Tight:wght@300;400;500&display=swap" rel="stylesheet">
 <style>
 :root{
-  --bg-0:#06080d;
-  --bg-1:#0b0f17;
-  --bg-2:#11161f;
-  --surface:rgba(20,26,38,0.55);
-  --border:rgba(180,200,230,0.07);
-  --border-strong:rgba(180,200,230,0.15);
-  --ink:#e8eef7;
-  --ink-dim:#8a95a8;
-  --ink-faint:#525d70;
-  --accent:#ff6b3d;
-  --rise:#ff6b3d;
-  --fall:#4cc9f0;
+  --bg:#05070c;
+  --bg1:#090d15;
+  --bg2:#0d1220;
+  --surf:rgba(14,20,34,0.6);
+  --border:rgba(160,190,230,0.06);
+  --border2:rgba(160,190,230,0.13);
+  --ink:#dde6f5;
+  --dim:#7a8899;
+  --faint:#3e4d60;
+  --accent:#e05a28;
+  --accentDim:rgba(224,90,40,0.15);
+  --rise:#e05a28;
+  --fall:#3bb8d8;
   --serif:'Fraunces',Georgia,serif;
   --sans:'Inter Tight',system-ui,sans-serif;
-  --mono:'JetBrains Mono',ui-monospace,monospace;
+  --mono:'JetBrains Mono',monospace;
 }
 *{box-sizing:border-box;margin:0;padding:0}
-html,body{background:var(--bg-0);color:var(--ink);font-family:var(--sans);overflow-x:hidden}
+html,body{background:var(--bg);color:var(--ink);font-family:var(--sans);overflow-x:hidden;scroll-behavior:smooth}
+
+/* atmospheric background */
 body{
   background:
-    radial-gradient(ellipse 60% 35% at 50% -5%, rgba(255,107,61,0.07), transparent 55%),
-    radial-gradient(ellipse 40% 25% at 85% 95%, rgba(76,201,240,0.04), transparent 55%),
-    var(--bg-0);
+    radial-gradient(ellipse 80% 50% at 50% -10%, rgba(224,90,40,0.055) 0%, transparent 60%),
+    radial-gradient(ellipse 50% 40% at 10% 60%, rgba(59,184,216,0.025) 0%, transparent 55%),
+    radial-gradient(ellipse 60% 50% at 90% 100%, rgba(140,80,200,0.02) 0%, transparent 55%),
+    var(--bg);
   min-height:100vh;
 }
 body::before{
   content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
-  background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='180' height='180'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/><feColorMatrix values='0 0 0 0 0.9 0 0 0 0 0.9 0 0 0 0 1 0 0 0 0.04 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
-  opacity:0.4;mix-blend-mode:overlay;
+  background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2'/><feColorMatrix values='0 0 0 0 0.85 0 0 0 0 0.9 0 0 0 0 1 0 0 0 0.04 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
+  opacity:0.45;mix-blend-mode:soft-light;
 }
 
-/* ── TOPBAR ── */
+/* TOPBAR */
 .topbar{
-  position:sticky;top:0;z-index:50;
+  position:fixed;top:0;left:0;right:0;z-index:100;
   display:flex;align-items:center;justify-content:space-between;
-  padding:12px 32px;
-  background:rgba(6,8,13,0.85);
-  backdrop-filter:blur(24px);
+  padding:14px 36px;
+  background:rgba(5,7,12,0.75);
+  backdrop-filter:blur(28px) saturate(130%);
   border-bottom:1px solid var(--border);
 }
-.brand{display:flex;align-items:center;gap:10px}
+.brand{display:flex;align-items:center;gap:11px;text-decoration:none}
 .brand-mark{
-  width:28px;height:28px;border-radius:6px;
-  background:linear-gradient(135deg,#ff6b3d,#ff4d6d);
+  width:26px;height:26px;border-radius:5px;
+  background:linear-gradient(135deg,#e05a28 0%,#c03050 100%);
   position:relative;overflow:hidden;
-  box-shadow:0 0 16px rgba(255,107,61,0.3);
+  box-shadow:0 0 14px rgba(224,90,40,0.25),inset 0 0 0 1px rgba(255,255,255,0.1);
 }
 .brand-mark::after{
   content:'';position:absolute;inset:4px;
-  border:1.5px solid rgba(255,255,255,0.85);border-radius:2px;
+  border:1.5px solid rgba(255,255,255,0.8);border-radius:2px;
   clip-path:polygon(50% 0%,100% 38%,82% 100%,18% 100%,0% 38%);
 }
-.brand-text .name{font-family:var(--serif);font-size:16px;font-weight:500;letter-spacing:-0.01em}
-.brand-text .sub{font-family:var(--mono);font-size:8.5px;color:var(--ink-faint);letter-spacing:0.18em;text-transform:uppercase;margin-top:1px}
-.topbar-right{display:flex;align-items:center;gap:18px}
-.live-pill{
-  display:flex;align-items:center;gap:6px;
-  font-family:var(--mono);font-size:10px;color:var(--ink-dim);letter-spacing:0.06em;
-  padding:4px 10px;border:1px solid var(--border);border-radius:20px;
+.brand-name{font-family:var(--serif);font-size:15px;font-weight:400;letter-spacing:-0.01em;color:var(--ink)}
+.topbar-r{display:flex;align-items:center;gap:20px}
+.live-indicator{
+  display:flex;align-items:center;gap:7px;
+  font-family:var(--mono);font-size:9.5px;color:var(--dim);letter-spacing:0.05em;
 }
-.live-dot{width:5px;height:5px;border-radius:50%;background:#4ade80;box-shadow:0 0 7px #4ade80;animation:lp 2s ease-in-out infinite}
-@keyframes lp{0%,100%{opacity:1}50%{opacity:0.4}}
-.clock{font-family:var(--mono);font-size:10px;color:var(--ink-faint);letter-spacing:0.05em}
+.live-dot{width:5px;height:5px;border-radius:50%;background:#4ade80;box-shadow:0 0 8px rgba(74,222,128,0.7);animation:ld 2.5s ease-in-out infinite}
+@keyframes ld{0%,100%{opacity:1;transform:scale(1)}50%{opacity:0.35;transform:scale(0.8)}}
+.clock{font-family:var(--mono);font-size:9.5px;color:var(--faint);letter-spacing:0.04em}
 
-/* ── HERO ── */
+/* HERO */
 .hero{
   position:relative;z-index:1;
-  padding:56px 32px 28px;
-  max-width:1520px;margin:0 auto;
-  display:grid;grid-template-columns:1fr 1fr;gap:48px;align-items:end;
+  padding:130px 36px 0;
+  max-width:1480px;margin:0 auto;
 }
-.hero-left .eyebrow{
-  font-family:var(--mono);font-size:10px;letter-spacing:0.28em;text-transform:uppercase;
-  color:var(--accent);margin-bottom:16px;
-  display:flex;align-items:center;gap:8px;
+.hero-eyebrow{
+  font-family:var(--mono);font-size:9.5px;letter-spacing:0.3em;text-transform:uppercase;
+  color:var(--accent);margin-bottom:22px;
+  display:flex;align-items:center;gap:10px;
 }
-.hero-left .eyebrow::before{content:'';width:20px;height:1px;background:var(--accent)}
-.hero-left h1{
-  font-family:var(--serif);font-weight:300;
-  font-size:clamp(38px,4.5vw,72px);line-height:0.97;
-  letter-spacing:-0.025em;
+.hero-eyebrow::before{content:'';width:18px;height:1px;background:var(--accent);opacity:0.7}
+.hero-title{
+  font-family:var(--serif);font-weight:300;font-style:italic;
+  font-size:clamp(36px,4.8vw,78px);line-height:1.0;
+  letter-spacing:-0.03em;max-width:820px;color:var(--ink);
 }
-.hero-left h1 em{font-style:italic;color:var(--accent);font-weight:400}
-.hero-left .sub{
-  margin-top:16px;font-size:14.5px;line-height:1.6;
-  color:var(--ink-dim);font-weight:300;max-width:420px;
+.hero-title span{font-style:normal;color:rgba(221,230,245,0.55)}
+
+/* SIGNATURE INSIGHT */
+.signature-insight{
+  margin-top:40px;
+  padding:22px 28px;
+  border:1px solid var(--border2);border-radius:14px;
+  background:linear-gradient(135deg, rgba(224,90,40,0.06) 0%, rgba(59,184,216,0.03) 100%);
+  backdrop-filter:blur(8px);
+  max-width:900px;
+  position:relative;overflow:hidden;
+}
+.signature-insight::before{
+  content:'';position:absolute;left:0;top:0;bottom:0;width:2px;
+  background:linear-gradient(to bottom, var(--accent), transparent);
+}
+.si-label{
+  font-family:var(--mono);font-size:8.5px;letter-spacing:0.25em;text-transform:uppercase;
+  color:var(--accent);margin-bottom:10px;
+}
+.si-text{
+  font-family:var(--serif);font-size:clamp(16px,1.8vw,22px);
+  font-weight:300;color:var(--ink);line-height:1.5;letter-spacing:-0.01em;
+}
+.si-text em{font-style:italic;color:var(--accent)}
+.si-sub{
+  margin-top:10px;font-family:var(--mono);font-size:10px;color:var(--dim);
+  letter-spacing:0.04em;display:flex;align-items:center;gap:14px;flex-wrap:wrap;
+}
+.si-tag{
+  padding:2px 8px;border-radius:3px;
+  background:rgba(255,255,255,0.04);border:1px solid var(--border2);
+  font-size:9.5px;
 }
 
-/* NARRATIVE PULSE STRIP — right side of hero */
+/* NARRATIVE STRIP */
 .narrative-strip{
-  background:var(--surface);border:1px solid var(--border);
-  border-radius:14px;backdrop-filter:blur(12px);
-  overflow:hidden;
+  margin-top:32px;padding-bottom:40px;
+  max-width:1480px;margin-left:auto;margin-right:auto;padding-left:36px;padding-right:36px;
 }
-.strip-header{
-  display:flex;align-items:center;justify-content:space-between;
-  padding:13px 16px;border-bottom:1px solid var(--border);
+.strip-inner{
+  display:flex;align-items:stretch;gap:1px;
+  background:var(--border);border-radius:12px;overflow:hidden;
+  border:1px solid var(--border);
 }
-.strip-title{font-family:var(--mono);font-size:9.5px;letter-spacing:0.2em;text-transform:uppercase;color:var(--ink-faint)}
-.time-tabs{display:flex;gap:2px}
-.time-tab{
-  font-family:var(--mono);font-size:9px;letter-spacing:0.08em;text-transform:uppercase;
-  color:var(--ink-faint);padding:4px 10px;border-radius:4px;cursor:pointer;
+.strip-tab-header{
+  display:flex;align-items:center;gap:2px;
+  padding:10px 14px;background:var(--bg1);border-bottom:1px solid var(--border);
+}
+.strip-tab{
+  font-family:var(--mono);font-size:8.5px;letter-spacing:0.1em;text-transform:uppercase;
+  color:var(--faint);padding:4px 9px;border-radius:3px;cursor:pointer;
   background:transparent;border:none;transition:all 0.15s;
 }
-.time-tab.active{color:var(--ink);background:rgba(255,107,61,0.12);box-shadow:inset 0 0 0 1px rgba(255,107,61,0.2)}
-.time-tab:hover{color:var(--ink-dim)}
-
-.strip-body{padding:14px 16px;display:flex;flex-direction:column;gap:10px}
-.strip-row{display:flex;align-items:center;gap:0;min-height:52px}
-.strip-from,.strip-to{flex:1;padding:0 4px}
-.strip-label{font-family:var(--mono);font-size:8px;letter-spacing:0.18em;text-transform:uppercase;margin-bottom:3px}
-.strip-label.fall{color:var(--fall)}
-.strip-label.rise{color:var(--rise)}
-.strip-topic{font-size:13.5px;color:var(--ink);font-weight:500;line-height:1.2}
-.strip-meta{font-family:var(--mono);font-size:9.5px;color:var(--ink-faint);margin-top:2px}
-.strip-arrow{
-  width:36px;flex-shrink:0;display:flex;align-items:center;justify-content:center;
-  color:var(--accent);opacity:0.5;font-size:16px;
+.strip-tab.active{color:var(--ink);background:rgba(224,90,40,0.12)}
+.strip-tab:hover{color:var(--dim)}
+.strip-col{
+  flex:1;background:var(--bg1);padding:0;
 }
-.strip-divider{height:1px;background:var(--border);margin:2px 0}
+.strip-col-head{
+  padding:10px 16px;border-bottom:1px solid var(--border);
+  font-family:var(--mono);font-size:8.5px;letter-spacing:0.2em;text-transform:uppercase;
+}
+.strip-col-head.fade{color:var(--fall)}
+.strip-col-head.rise2{color:var(--rise)}
+.strip-col-head.shift{color:var(--dim)}
+.strip-col-body{padding:12px 16px;display:flex;flex-direction:column;gap:8px}
+.strip-item{
+  display:flex;align-items:baseline;gap:8px;
+}
+.strip-topic{font-size:13px;color:var(--ink);font-weight:500}
+.strip-note{font-family:var(--mono);font-size:9.5px;color:var(--faint)}
+.strip-arr{color:var(--accent);opacity:0.5;font-size:14px;flex-shrink:0}
 
-/* ── MAIN GRID ── */
-.main-grid{
+/* MAIN LAYOUT */
+.main{
   position:relative;z-index:1;
-  max-width:1520px;margin:0 auto;
-  padding:0 32px 32px;
+  max-width:1480px;margin:0 auto;
+  padding:0 36px 36px;
   display:grid;
-  grid-template-columns:1fr 380px;
-  grid-template-rows:auto;
-  gap:20px;
+  grid-template-columns:1fr 360px;
+  gap:18px;
 }
 
-/* ── MAP CARD ── */
+/* MAP */
 .map-card{
-  background:var(--surface);border:1px solid var(--border);
-  border-radius:16px;backdrop-filter:blur(12px);
-  position:relative;overflow:hidden;
-  grid-column:1;grid-row:1;
+  background:var(--surf);border:1px solid var(--border);
+  border-radius:16px;backdrop-filter:blur(16px);
+  overflow:hidden;position:relative;
 }
 .map-card::before{
-  content:'';position:absolute;inset:0;pointer-events:none;
-  background:radial-gradient(ellipse 60% 40% at 40% 0%,rgba(255,107,61,0.04),transparent 60%);
+  content:'';position:absolute;inset:0;pointer-events:none;z-index:0;
+  background:
+    radial-gradient(ellipse 70% 50% at 35% 0%, rgba(224,90,40,0.05) 0%, transparent 60%),
+    radial-gradient(ellipse 50% 40% at 80% 100%, rgba(59,184,216,0.03) 0%, transparent 60%);
 }
-.map-card-header{
+.map-top{
+  position:relative;z-index:1;
   display:flex;align-items:center;justify-content:space-between;
   padding:16px 20px 0;
 }
-.map-card-title{font-family:var(--serif);font-size:18px;font-weight:400;letter-spacing:-0.01em}
-.map-card-meta{font-family:var(--mono);font-size:9.5px;color:var(--ink-faint);letter-spacing:0.06em;margin-top:2px}
-.legend{display:flex;align-items:center;gap:10px;font-family:var(--mono);font-size:9px;color:var(--ink-dim)}
-.legend-bar{height:4px;width:100px;border-radius:2px;background:linear-gradient(to right,#152840,#2e7a9e 30%,#b87d30 60%,#e83f20 80%,#ff1a3a)}
-
-.map-controls{
-  display:flex;align-items:center;justify-content:space-between;
-  padding:10px 20px 8px;
+.map-title-block .mt{font-family:var(--serif);font-size:17px;font-weight:400;letter-spacing:-0.01em}
+.map-title-block .ms{font-family:var(--mono);font-size:9px;color:var(--faint);letter-spacing:0.06em;margin-top:2px}
+.legend{display:flex;align-items:center;gap:9px;font-family:var(--mono);font-size:8.5px;color:var(--dim)}
+.legend-bar{
+  height:3px;width:80px;border-radius:2px;
+  background:linear-gradient(to right,#0e2035,#1a5580 25%,#8a5c18 55%,#c0381a 80%,#e01020);
 }
-.map-controls-label{font-family:var(--mono);font-size:9px;letter-spacing:0.16em;text-transform:uppercase;color:var(--ink-faint)}
-.layer-tabs{display:flex;gap:3px}
-.layer-tab{
-  font-family:var(--mono);font-size:9.5px;letter-spacing:0.06em;text-transform:uppercase;
-  color:var(--ink-faint);padding:4px 10px;border-radius:4px;cursor:pointer;
+.layer-row{
+  position:relative;z-index:1;
+  display:flex;align-items:center;gap:8px;
+  padding:10px 20px 6px;
+}
+.layer-label{font-family:var(--mono);font-size:8.5px;letter-spacing:0.14em;text-transform:uppercase;color:var(--faint)}
+.ltabs{display:flex;gap:3px}
+.ltab{
+  font-family:var(--mono);font-size:9px;letter-spacing:0.06em;text-transform:uppercase;
+  color:var(--faint);padding:3px 9px;border-radius:3px;cursor:pointer;
   background:rgba(255,255,255,0.02);border:1px solid var(--border);transition:all 0.15s;
 }
-.layer-tab.active{color:var(--ink);background:rgba(255,107,61,0.09);border-color:rgba(255,107,61,0.22)}
-.layer-tab:hover{color:var(--ink-dim)}
+.ltab.active{color:var(--ink);background:rgba(224,90,40,0.08);border-color:rgba(224,90,40,0.2)}
+.ltab:hover{color:var(--dim)}
 
-.map-wrap{
-  position:relative;width:100%;
-  padding:0 16px 16px;
-}
 .map-svg-wrap{
-  position:relative;width:100%;aspect-ratio:1/1;max-height:660px;
+  position:relative;padding:12px 16px 16px;
 }
-#india-map{width:100%;height:100%;display:block}
+.map-inner{position:relative;aspect-ratio:1/1;width:100%}
+#india-map{width:100%;height:100%;display:block;overflow:visible}
+
+/* map state styles */
 #india-map .state{
-  cursor:pointer;transition:filter 0.2s,stroke 0.2s;
+  cursor:pointer;
+  transition:filter 0.25s ease, stroke-width 0.2s ease, stroke 0.2s ease;
 }
 #india-map .state:hover{
-  stroke:#fff !important;stroke-width:1.2 !important;
-  filter:drop-shadow(0 0 12px rgba(255,255,255,0.3)) brightness(1.2);
+  stroke:rgba(255,255,255,0.7) !important;stroke-width:1px !important;
+  filter:brightness(1.25) drop-shadow(0 0 10px rgba(255,255,255,0.2));
 }
 #india-map .state.selected{
-  stroke:#fff !important;stroke-width:1.6 !important;
-  filter:drop-shadow(0 0 16px rgba(255,255,255,0.4)) brightness(1.3);
+  stroke:rgba(255,255,255,0.9) !important;stroke-width:1.4px !important;
+  filter:brightness(1.35) drop-shadow(0 0 16px rgba(255,255,255,0.3));
 }
-.pulse-ring{fill:none;pointer-events:none;animation:pulse 2.4s ease-out infinite}
-@keyframes pulse{0%{r:6;opacity:0.6;stroke-width:1.5}100%{r:28;opacity:0;stroke-width:0.3}}
+
+/* animated pulse rings */
+.pulse-ring{fill:none;pointer-events:none}
+.pulse-ring.p1{animation:pr 2.8s ease-out infinite}
+.pulse-ring.p2{animation:pr 2.8s ease-out 0.9s infinite}
+@keyframes pr{
+  0%{r:4;opacity:0.7;stroke-width:1.2}
+  100%{r:26;opacity:0;stroke-width:0.2}
+}
+
+/* atmospheric glow behind hot states */
+.state-glow{pointer-events:none;fill:none}
+@keyframes glowPulse{0%,100%{opacity:0.12}50%{opacity:0.22}}
+
 .map-tooltip{
   position:absolute;pointer-events:none;
-  background:rgba(6,8,13,0.96);backdrop-filter:blur(8px);
-  border:1px solid var(--border-strong);border-radius:8px;
-  padding:10px 14px;opacity:0;transition:opacity 0.12s;z-index:10;min-width:160px;
+  background:rgba(5,7,12,0.95);backdrop-filter:blur(12px);
+  border:1px solid var(--border2);border-radius:9px;
+  padding:12px 14px;opacity:0;transition:opacity 0.12s;z-index:20;min-width:170px;
 }
-.tt-name{font-family:var(--serif);font-size:15px;margin-bottom:6px}
-.tt-row{display:flex;justify-content:space-between;font-family:var(--mono);font-size:9.5px;color:var(--ink-dim);margin-top:3px}
-.tt-row strong{color:var(--ink)}
+.tt-n{font-family:var(--serif);font-size:16px;font-weight:400;margin-bottom:8px;color:var(--ink)}
+.tt-r{display:flex;justify-content:space-between;font-family:var(--mono);font-size:9.5px;color:var(--dim);margin-top:4px}
+.tt-r strong{color:var(--ink)}
+.tt-nar{
+  margin-top:8px;padding-top:8px;border-top:1px solid var(--border);
+  font-family:var(--mono);font-size:9px;color:var(--faint);
+}
+.tt-nar strong{color:var(--dim);display:block;margin-bottom:2px}
 
-/* ── STATE PANEL (right col, row 1) ── */
+/* STATE PANEL */
 .state-panel{
-  background:var(--surface);border:1px solid var(--border);
-  border-radius:16px;padding:18px;backdrop-filter:blur(12px);
-  grid-column:2;grid-row:1;
-  overflow-y:auto;max-height:760px;
+  background:var(--surf);border:1px solid var(--border);
+  border-radius:16px;backdrop-filter:blur(16px);
+  padding:20px;overflow-y:auto;max-height:780px;
 }
-.state-panel::-webkit-scrollbar{width:4px}
-.state-panel::-webkit-scrollbar-thumb{background:var(--border-strong);border-radius:2px}
+.state-panel::-webkit-scrollbar{width:3px}
+.state-panel::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px}
 
-.panel-empty{text-align:center;padding:48px 16px;color:var(--ink-faint)}
-.panel-empty svg{opacity:0.25;margin-bottom:14px}
-.panel-empty .t{font-family:var(--serif);font-size:17px;color:var(--ink-dim);margin-bottom:6px}
-.panel-empty .s{font-size:12px;line-height:1.6}
+.panel-empty{
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  height:100%;min-height:320px;text-align:center;padding:32px 20px;
+}
+.panel-empty svg{opacity:0.15;margin-bottom:18px}
+.panel-empty .pe-t{font-family:var(--serif);font-size:18px;font-style:italic;color:var(--dim);margin-bottom:8px}
+.panel-empty .pe-s{font-family:var(--mono);font-size:10px;color:var(--faint);letter-spacing:0.04em;line-height:1.7}
 
-.state-header{
+/* state panel internals */
+.sp-head{
   display:flex;justify-content:space-between;align-items:flex-start;
-  margin-bottom:14px;padding-bottom:14px;border-bottom:1px solid var(--border);
+  margin-bottom:16px;padding-bottom:14px;border-bottom:1px solid var(--border);
 }
-.s-ek{font-family:var(--mono);font-size:9px;letter-spacing:0.2em;color:var(--ink-faint);text-transform:uppercase;margin-bottom:4px}
-.s-name{font-family:var(--serif);font-size:26px;font-weight:400;letter-spacing:-0.01em;line-height:1}
+.sp-ek{font-family:var(--mono);font-size:8.5px;letter-spacing:0.2em;color:var(--faint);text-transform:uppercase;margin-bottom:5px}
+.sp-name{font-family:var(--serif);font-size:28px;font-weight:300;letter-spacing:-0.02em;line-height:1;color:var(--ink)}
 .fav-btn{
-  background:transparent;border:1px solid var(--border-strong);color:var(--ink-dim);
+  background:transparent;border:1px solid var(--border2);color:var(--faint);
   width:30px;height:30px;border-radius:6px;cursor:pointer;
-  display:flex;align-items:center;justify-content:center;transition:all 0.2s;padding:0;flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;transition:all 0.18s;padding:0;flex-shrink:0;
 }
-.fav-btn:hover{color:var(--ink);border-color:var(--ink-dim)}
-.fav-btn.active{color:var(--accent);border-color:rgba(255,107,61,0.35);background:rgba(255,107,61,0.07)}
-.fav-btn svg{width:14px;height:14px}
+.fav-btn:hover{color:var(--dim);border-color:var(--dim)}
+.fav-btn.on{color:var(--accent);border-color:rgba(224,90,40,0.3);background:rgba(224,90,40,0.07)}
+.fav-btn svg{width:13px;height:13px}
 
-.score-row{
-  display:flex;align-items:center;gap:12px;
-  padding:9px 12px;border-radius:7px;
-  background:rgba(255,255,255,0.025);border:1px solid var(--border);
+/* narrative timeline — the signature feature */
+.nar-timeline{
+  margin-bottom:16px;
+}
+.nt-label{font-family:var(--mono);font-size:8.5px;letter-spacing:0.18em;text-transform:uppercase;color:var(--faint);margin-bottom:10px}
+.nt-flow{
+  display:flex;flex-direction:column;gap:0;
+  position:relative;padding-left:16px;
+}
+.nt-flow::before{
+  content:'';position:absolute;left:5px;top:6px;bottom:6px;width:1px;
+  background:linear-gradient(to bottom,var(--accent),var(--border));opacity:0.4;
+}
+.nt-step{
+  display:flex;align-items:flex-start;gap:10px;
+  padding:5px 0;position:relative;
+}
+.nt-dot{
+  width:10px;height:10px;border-radius:50%;flex-shrink:0;
+  position:absolute;left:-16px;top:7px;
+  border:1.5px solid currentColor;background:var(--bg);
+}
+.nt-step.past .nt-dot{color:var(--faint)}
+.nt-step.recent .nt-dot{color:var(--accent);box-shadow:0 0 8px rgba(224,90,40,0.4)}
+.nt-step.current .nt-dot{color:var(--accent);background:var(--accent);box-shadow:0 0 10px rgba(224,90,40,0.5)}
+.nt-content{flex:1}
+.nt-topic{font-size:12.5px;color:var(--ink);font-weight:500;line-height:1.3}
+.nt-step.past .nt-topic{color:var(--faint)}
+.nt-step.recent .nt-topic{color:var(--dim)}
+.nt-when{font-family:var(--mono);font-size:9px;color:var(--faint);margin-top:1px}
+
+/* insight block */
+.insight{
+  margin-bottom:14px;
+  padding:12px 14px 12px 16px;
+  border-left:1.5px solid var(--accent);
+  background:rgba(224,90,40,0.03);border-radius:0 8px 8px 0;
+  font-family:var(--serif);font-size:13.5px;font-style:italic;
+  color:var(--dim);line-height:1.55;font-weight:300;
+}
+
+/* compact score strip */
+.score-strip{
+  display:flex;align-items:center;gap:16px;
+  padding:8px 12px;border-radius:7px;
+  background:rgba(255,255,255,0.02);border:1px solid var(--border);
   margin-bottom:14px;
 }
-.score-label{font-family:var(--mono);font-size:8.5px;letter-spacing:0.16em;text-transform:uppercase;color:var(--ink-faint)}
-.score-val{font-family:var(--serif);font-size:26px;font-weight:300;letter-spacing:-0.03em}
-.score-delta{font-family:var(--mono);font-size:10px;padding:3px 7px;border-radius:4px;margin-left:auto}
-.score-delta.up{color:#ff8a5b;background:rgba(255,107,61,0.1)}
-.score-delta.dn{color:#4cc9f0;background:rgba(76,201,240,0.1)}
+.ss-item{display:flex;flex-direction:column;gap:2px}
+.ss-label{font-family:var(--mono);font-size:8px;letter-spacing:0.15em;text-transform:uppercase;color:var(--faint)}
+.ss-val{font-family:var(--serif);font-size:22px;font-weight:300;letter-spacing:-0.02em;color:var(--ink)}
+.ss-delta{font-family:var(--mono);font-size:10px;padding:2px 7px;border-radius:3px}
+.ss-delta.up{color:#e06030;background:rgba(224,90,40,0.1)}
+.ss-delta.dn{color:#3bb8d8;background:rgba(59,184,216,0.1)}
+.ss-divider{width:1px;height:32px;background:var(--border);flex-shrink:0}
+.ss-nar{font-size:11.5px;color:var(--dim);font-weight:500}
 
-.insight-box{
-  border-left:2px solid var(--accent);
-  padding:10px 12px;background:rgba(255,107,61,0.03);border-radius:0 7px 7px 0;
-  font-family:var(--serif);font-size:13px;line-height:1.55;color:var(--ink);
-  font-style:italic;font-weight:300;
+.sp-section{margin-bottom:14px}
+.sp-sec-title{
+  font-family:var(--mono);font-size:8.5px;letter-spacing:0.18em;text-transform:uppercase;
+  color:var(--faint);margin-bottom:9px;
 }
 
-.sub-title{
-  font-family:var(--mono);font-size:9px;letter-spacing:0.18em;text-transform:uppercase;
-  color:var(--ink-faint);margin:14px 0 8px;
-  display:flex;justify-content:space-between;
-}
-.narratives{display:flex;flex-direction:column;gap:7px}
-.narrative{display:grid;grid-template-columns:1fr auto;gap:6px;align-items:center}
-.nar-label{font-size:11.5px;color:var(--ink)}
-.nar-val{font-family:var(--mono);font-size:10px;color:var(--ink-dim)}
-.nar-track{grid-column:1/-1;height:2px;background:rgba(255,255,255,0.04);border-radius:1px;overflow:hidden;margin-top:-4px}
-.nar-fill{height:100%;border-radius:1px;transition:width 0.6s}
+/* narratives */
+.nar-list{display:flex;flex-direction:column;gap:6px}
+.nar-item2{display:grid;grid-template-columns:1fr auto;gap:6px;align-items:center}
+.ni-label{font-size:11.5px;color:var(--ink)}
+.ni-val{font-family:var(--mono);font-size:10px;color:var(--faint)}
+.ni-track{grid-column:1/-1;height:1.5px;background:rgba(255,255,255,0.04);border-radius:1px;overflow:hidden;margin-top:-3px}
+.ni-fill{height:100%;border-radius:1px;transition:width 0.7s}
 
-.rf-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
-.rf-block{background:rgba(255,255,255,0.02);border:1px solid var(--border);border-radius:7px;padding:9px}
-.rf-block .rh{font-family:var(--mono);font-size:8.5px;letter-spacing:0.14em;text-transform:uppercase;color:var(--ink-faint);margin-bottom:7px}
-.rf-block.up .rh{color:var(--rise)}
-.rf-block.dn .rh{color:var(--fall)}
-.rf-block .ri{font-size:11px;padding:4px 0;border-top:1px solid var(--border);color:var(--ink-dim)}
-.rf-block .ri:first-of-type{border-top:none;padding-top:0}
-.rf-block .ri strong{color:var(--ink);font-weight:500;display:block;font-size:11.5px}
-.rf-block .ri span{font-family:var(--mono);font-size:9.5px;color:var(--ink-faint)}
+/* movement */
+.mv-grid{display:grid;grid-template-columns:1fr 1fr;gap:7px}
+.mv-block{background:rgba(255,255,255,0.02);border:1px solid var(--border);border-radius:7px;padding:9px}
+.mv-h{font-family:var(--mono);font-size:8px;letter-spacing:0.14em;text-transform:uppercase;color:var(--faint);margin-bottom:7px}
+.mv-block.up .mv-h{color:var(--rise)}
+.mv-block.dn .mv-h{color:var(--fall)}
+.mv-it{font-size:10.5px;padding:4px 0;border-top:1px solid var(--border);color:var(--faint)}
+.mv-it:first-of-type{border-top:none;padding-top:0}
+.mv-it strong{color:var(--dim);font-weight:500;display:block;font-size:11px}
+.mv-it span{font-family:var(--mono);font-size:9px}
 
-.emotion-row{display:flex;align-items:center;gap:14px}
-.emotion-donut{width:80px;height:80px;flex-shrink:0}
-.emotion-legend{flex:1;display:flex;flex-direction:column;gap:4px;font-size:11px}
-.ei{display:flex;align-items:center;gap:6px}
-.esw{width:6px;height:6px;border-radius:2px;flex-shrink:0}
-.en{flex:1;color:var(--ink-dim)}
-.ep{font-family:var(--mono);font-size:10px;color:var(--ink)}
+/* emotion */
+.em-row{display:flex;align-items:center;gap:12px}
+.em-donut{width:76px;height:76px;flex-shrink:0}
+.em-leg{flex:1;display:flex;flex-direction:column;gap:4px}
+.em-item{display:flex;align-items:center;gap:6px}
+.em-sw{width:6px;height:6px;border-radius:2px;flex-shrink:0}
+.em-n{flex:1;font-size:10.5px;color:var(--dim)}
+.em-p{font-family:var(--mono);font-size:9.5px;color:var(--ink)}
 
-.tl-chart{height:80px;margin-top:4px}
+/* timeline chart */
+.tl-wrap{height:72px}
 
-.articles{display:flex;flex-direction:column;gap:5px}
-.article{
-  display:flex;gap:8px;padding:8px;border-radius:6px;
+/* articles */
+.art-list{display:flex;flex-direction:column;gap:5px}
+.art-item{
+  display:flex;gap:8px;padding:7px 9px;border-radius:6px;
   border:1px solid var(--border);background:rgba(255,255,255,0.01);
   transition:all 0.12s;
 }
-.article:hover{background:rgba(255,255,255,0.025);border-color:var(--border-strong)}
-.a-src{font-family:var(--mono);font-size:8px;letter-spacing:0.1em;text-transform:uppercase;color:var(--ink-faint);flex-shrink:0;width:48px;padding-top:1px}
-.a-txt{font-size:11.5px;line-height:1.4;color:var(--ink)}
+.art-item:hover{background:rgba(255,255,255,0.02);border-color:var(--border2)}
+.art-src{font-family:var(--mono);font-size:7.5px;letter-spacing:0.08em;text-transform:uppercase;color:var(--faint);flex-shrink:0;width:44px;padding-top:1px}
+.art-txt{font-size:11px;line-height:1.4;color:var(--dim)}
 
-/* ── NARRATIVE INTELLIGENCE ROW (below map + panel) ── */
-.narrative-row{
+/* NARRATIVE INTELLIGENCE ROW */
+.nar-row{
   position:relative;z-index:1;
-  max-width:1520px;margin:0 auto;
-  padding:0 32px 24px;
-  display:grid;grid-template-columns:1fr 1fr 1fr;gap:20px;
+  max-width:1480px;margin:0 auto;
+  padding:0 36px 28px;
+  display:grid;grid-template-columns:1fr 1fr 1fr;gap:18px;
 }
-
 .nar-card{
-  background:var(--surface);border:1px solid var(--border);
-  border-radius:14px;backdrop-filter:blur(12px);overflow:hidden;
+  background:var(--surf);border:1px solid var(--border);
+  border-radius:14px;backdrop-filter:blur(14px);overflow:hidden;
 }
-.nar-card-header{
-  padding:14px 18px;border-bottom:1px solid var(--border);
+.nc-head{
+  padding:14px 16px;border-bottom:1px solid var(--border);
 }
-.nar-card-title{font-family:var(--serif);font-size:16px;font-weight:400;letter-spacing:-0.01em}
-.nar-card-meta{font-family:var(--mono);font-size:9px;color:var(--ink-faint);letter-spacing:0.06em;margin-top:2px}
-.nar-card-body{padding:14px 18px}
+.nc-title{font-family:var(--serif);font-size:15px;font-weight:400;letter-spacing:-0.01em;color:var(--ink)}
+.nc-sub{font-family:var(--mono);font-size:8.5px;color:var(--faint);letter-spacing:0.05em;margin-top:2px}
+.nc-body{padding:13px 16px;display:flex;flex-direction:column;gap:0}
 
-/* Rising/Falling narratives */
-.mom-item{
-  display:flex;align-items:center;gap:10px;
-  padding:8px 0;border-top:1px solid var(--border);
+.mom-it{
+  display:flex;align-items:center;gap:9px;
+  padding:7px 0;border-top:1px solid var(--border);
 }
-.mom-item:first-of-type{border-top:none;padding-top:0}
-.mom-rank{font-family:var(--mono);font-size:9.5px;color:var(--ink-faint);width:14px;flex-shrink:0}
-.mom-info{flex:1}
-.mom-name{font-size:12.5px;color:var(--ink);font-weight:500}
-.mom-states{font-family:var(--mono);font-size:9px;color:var(--ink-faint);margin-top:1px}
-.mom-pct{font-family:var(--mono);font-size:11px;font-weight:500;flex-shrink:0}
-.mom-pct.rise{color:var(--rise)}
-.mom-pct.fall{color:var(--fall)}
-.mom-track{height:1.5px;background:rgba(255,255,255,0.04);border-radius:1px;margin-top:4px;overflow:hidden}
-.mom-fill{height:100%;border-radius:1px}
+.mom-it:first-of-type{border-top:none;padding-top:0}
+.mom-rk{font-family:var(--mono);font-size:9px;color:var(--faint);width:13px;flex-shrink:0}
+.mom-inf{flex:1}
+.mom-nm{font-size:12px;color:var(--ink);font-weight:500}
+.mom-st{font-family:var(--mono);font-size:8.5px;color:var(--faint);margin-top:1px}
+.mom-pc{font-family:var(--mono);font-size:10.5px;font-weight:400;flex-shrink:0}
+.mom-pc.r{color:var(--rise)}
+.mom-pc.f{color:var(--fall)}
+.mom-tr{height:1.5px;background:rgba(255,255,255,0.04);border-radius:1px;margin:3px 0 0;overflow:hidden}
+.mom-fl{height:100%;border-radius:1px}
 
-/* Regional shifts */
-.reg-item{
-  display:flex;gap:10px;align-items:center;
-  padding:9px 0;border-top:1px solid var(--border);cursor:pointer;
+.reg-it{
+  display:flex;gap:9px;align-items:flex-start;
+  padding:8px 0;border-top:1px solid var(--border);cursor:pointer;
   transition:opacity 0.15s;
 }
-.reg-item:first-of-type{border-top:none;padding-top:0}
-.reg-item:hover{opacity:0.8}
+.reg-it:first-of-type{border-top:none;padding-top:0}
+.reg-it:hover{opacity:0.75}
 .reg-badge{
-  font-family:var(--mono);font-size:8px;letter-spacing:0.08em;text-transform:uppercase;
-  padding:2px 7px;border-radius:3px;
-  background:rgba(255,107,61,0.08);border:1px solid rgba(255,107,61,0.15);
-  color:var(--accent);flex-shrink:0;white-space:nowrap;
+  font-family:var(--mono);font-size:8px;letter-spacing:0.07em;text-transform:uppercase;
+  padding:2px 6px;border-radius:3px;
+  background:rgba(224,90,40,0.07);border:1px solid rgba(224,90,40,0.14);
+  color:var(--accent);flex-shrink:0;margin-top:2px;white-space:nowrap;
 }
-.reg-flow{flex:1;font-size:12px;display:flex;align-items:center;gap:6px;flex-wrap:wrap}
-.reg-from{color:var(--ink-dim)}
-.reg-arr{color:var(--accent);opacity:0.6;font-size:13px}
+.reg-fl{flex:1;font-size:11.5px;line-height:1.5}
+.reg-from{color:var(--faint)}
+.reg-arr{color:var(--accent);opacity:0.5;margin:0 4px}
 .reg-to{color:var(--ink);font-weight:500}
-.reg-time{font-family:var(--mono);font-size:9px;color:var(--ink-faint);flex-shrink:0}
+.reg-tm{font-family:var(--mono);font-size:8.5px;color:var(--faint);flex-shrink:0;margin-top:2px}
 
-/* ── FAVORITES ── */
-.favs-section{
+/* FAVS */
+.favs{
   position:relative;z-index:1;
-  max-width:1520px;margin:0 auto;padding:0 32px 32px;
+  max-width:1480px;margin:0 auto;padding:0 36px 40px;
 }
-.sec-head{
-  font-family:var(--mono);font-size:9px;letter-spacing:0.2em;text-transform:uppercase;
-  color:var(--ink-faint);margin-bottom:10px;
-}
-.fav-row{display:flex;gap:10px;overflow-x:auto;padding-bottom:3px}
-.fav-row::-webkit-scrollbar{height:3px}
-.fav-row::-webkit-scrollbar-thumb{background:var(--border-strong);border-radius:2px}
+.favs-label{font-family:var(--mono);font-size:8.5px;letter-spacing:0.2em;text-transform:uppercase;color:var(--faint);margin-bottom:10px}
+.favs-row{display:flex;gap:10px;overflow-x:auto;padding-bottom:3px}
+.favs-row::-webkit-scrollbar{height:2px}
+.favs-row::-webkit-scrollbar-thumb{background:var(--border2);border-radius:1px}
 .fav-card{
-  flex:0 0 200px;background:var(--surface);border:1px solid var(--border);
-  border-radius:11px;padding:12px;cursor:pointer;transition:all 0.18s;
+  flex:0 0 190px;background:var(--surf);border:1px solid var(--border);
+  border-radius:10px;padding:12px;cursor:pointer;transition:all 0.18s;
 }
-.fav-card:hover{border-color:rgba(255,107,61,0.25);background:rgba(255,107,61,0.025)}
-.fav-head{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:7px}
-.fav-name{font-family:var(--serif);font-size:16px}
-.fav-score{font-family:var(--mono);font-size:10.5px;color:var(--ink-faint)}
-.fav-row2{display:flex;justify-content:space-between;font-size:10.5px;color:var(--ink-dim);margin-top:3px}
-.fav-row2 .v{color:var(--ink);font-family:var(--mono);font-size:10px}
-.fav-empty{padding:12px;color:var(--ink-faint);font-size:12px;font-style:italic}
+.fav-card:hover{border-color:rgba(224,90,40,0.22);background:rgba(224,90,40,0.02)}
+.fc-head{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:7px}
+.fc-name{font-family:var(--serif);font-size:15px;font-weight:400;color:var(--ink)}
+.fc-sc{font-family:var(--mono);font-size:10px;color:var(--faint)}
+.fc-row{display:flex;justify-content:space-between;font-size:10px;color:var(--faint);margin-top:3px}
+.fc-row .v{color:var(--dim);font-family:var(--mono);font-size:9.5px}
+.favs-empty{font-family:var(--mono);font-size:10px;color:var(--faint);font-style:italic;padding:4px 0}
 
-/* ── FOOTER ── */
+/* FOOT */
 .foot{
-  text-align:center;font-family:var(--mono);font-size:9px;letter-spacing:0.1em;
-  color:var(--ink-faint);padding:24px 32px 40px;max-width:640px;margin:0 auto;
-  position:relative;z-index:1;line-height:1.8;
+  text-align:center;font-family:var(--mono);font-size:8.5px;letter-spacing:0.1em;
+  color:var(--faint);padding:20px 36px 40px;max-width:580px;margin:0 auto;
+  position:relative;z-index:1;line-height:1.9;
 }
 
-@keyframes fadeUp{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:none}}
-.map-card,.state-panel,.nar-card,.narrative-strip{animation:fadeUp 0.5s cubic-bezier(.2,.8,.2,1) backwards}
-.nar-card:nth-child(2){animation-delay:0.06s}
-.nar-card:nth-child(3){animation-delay:0.12s}
+/* animations */
+@keyframes fadeUp{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+.map-card,.state-panel,.nar-card,.signature-insight{animation:fadeUp 0.55s cubic-bezier(.2,.8,.2,1) backwards}
+.nar-card:nth-child(2){animation-delay:0.07s}
+.nar-card:nth-child(3){animation-delay:0.14s}
+.signature-insight{animation-delay:0.05s}
 
 @media(max-width:1100px){
-  .hero{grid-template-columns:1fr}
-  .main-grid{grid-template-columns:1fr}
-  .state-panel{grid-row:2;max-height:none}
-  .narrative-row{grid-template-columns:1fr}
+  .main{grid-template-columns:1fr}
+  .state-panel{max-height:none}
+  .nar-row{grid-template-columns:1fr}
 }
 </style>
 </head>
 <body>
 
-<!-- TOPBAR -->
 <div class="topbar">
   <div class="brand">
     <div class="brand-mark"></div>
-    <div class="brand-text">
-      <span class="name">India Attention Map</span>
-      <span class="sub">Narrative intelligence</span>
-    </div>
+    <span class="brand-name">India Attention Map</span>
   </div>
-  <div class="topbar-right">
-    <div class="live-pill">
+  <div class="topbar-r">
+    <div class="live-indicator">
       <span class="live-dot"></span>
       <span id="live-count">…</span> signals
     </div>
@@ -417,64 +511,85 @@ body::before{
   </div>
 </div>
 
-<!-- HERO: title left, compact narrative strip right -->
+<!-- HERO -->
 <section class="hero">
-  <div class="hero-left">
-    <div class="eyebrow">India &middot; Political narrative intelligence</div>
-    <h1>What is India<br/><em>focused on</em><br/>right now.</h1>
-    <p class="sub">Observe India's collective attention across 30 states — then understand how its narratives are shifting beneath the surface.</p>
-  </div>
+  <div class="hero-eyebrow">Political narrative intelligence &middot; India</div>
+  <h1 class="hero-title">
+    Observing India's<br/>
+    <span>collective</span> political<br/>
+    attention — live.
+  </h1>
 
-  <!-- COMPACT NARRATIVE PULSE -->
-  <div class="narrative-strip">
-    <div class="strip-header">
-      <span class="strip-title">National narrative pulse</span>
-      <div class="time-tabs">
-        <button class="time-tab active" data-period="3m">3M</button>
-        <button class="time-tab" data-period="6m">6M</button>
-        <button class="time-tab" data-period="1y">1Y</button>
-      </div>
-    </div>
-    <div class="strip-body" id="strip-body">
-      <!-- populated by JS -->
+  <!-- SIGNATURE INSIGHT -->
+  <div class="signature-insight">
+    <div class="si-label">Current national narrative shift</div>
+    <div class="si-text" id="sig-insight">India's attention is moving from <em>inflation and cost-of-living anxiety</em> toward <em>governance accountability and border security</em> — a shift accelerating across the northern belt.</div>
+    <div class="si-sub">
+      <span class="si-tag" id="sig-tag1">↓ Inflation · fading</span>
+      <span class="si-tag" id="sig-tag2">↑ Governance · rising</span>
+      <span class="si-tag" id="sig-tag3">↑ Border security · surging</span>
     </div>
   </div>
 </section>
 
-<!-- MAIN GRID: map left, state panel right -->
-<div class="main-grid">
+<!-- COMPACT NARRATIVE STRIP -->
+<div class="narrative-strip">
+  <div class="strip-inner">
+    <div class="strip-col" style="max-width:200px;border-right:1px solid var(--border)">
+      <div class="strip-col-head fade" style="display:flex;align-items:center;justify-content:space-between">
+        <span>Fading</span>
+        <div class="strip-tab-header" style="padding:0;background:transparent;border:none">
+          <button class="strip-tab active" data-period="3m">3M</button>
+          <button class="strip-tab" data-period="6m">6M</button>
+          <button class="strip-tab" data-period="1y">1Y</button>
+        </div>
+      </div>
+      <div class="strip-col-body" id="strip-fading"></div>
+    </div>
+    <div class="strip-col" style="display:flex;align-items:center;justify-content:center;max-width:48px;border-right:1px solid var(--border)">
+      <span style="color:var(--accent);opacity:0.4;font-size:18px">→</span>
+    </div>
+    <div class="strip-col">
+      <div class="strip-col-head rise2">Rising</div>
+      <div class="strip-col-body" id="strip-rising"></div>
+    </div>
+  </div>
+</div>
 
-  <!-- MAP -->
+<!-- MAIN: MAP + STATE PANEL -->
+<div class="main">
+
   <div class="map-card">
-    <div class="map-card-header">
-      <div>
-        <div class="map-card-title">Attention heatmap</div>
-        <div class="map-card-meta" id="map-meta">30 states &middot; Live &middot; Signal-weighted</div>
+    <div class="map-top">
+      <div class="map-title-block">
+        <div class="mt">India &mdash; collective attention</div>
+        <div class="ms" id="map-meta">30 states &middot; live signal composite</div>
       </div>
-      <div class="legend">
-        <span>Low</span>
-        <div class="legend-bar"></div>
-        <span>High</span>
+      <div class="legend"><span>quiet</span><div class="legend-bar"></div><span>active</span></div>
+    </div>
+    <div class="layer-row">
+      <span class="layer-label">View</span>
+      <div class="ltabs">
+        <span class="ltab active" data-layer="attention">Attention</span>
+        <span class="ltab" data-layer="emotion">Emotion</span>
+        <span class="ltab" data-layer="velocity">Momentum</span>
       </div>
     </div>
-    <div class="map-controls">
-      <span class="map-controls-label">View by</span>
-      <div class="layer-tabs">
-        <span class="layer-tab active" data-layer="attention">Attention</span>
-        <span class="layer-tab" data-layer="emotion">Emotion</span>
-        <span class="layer-tab" data-layer="velocity">Velocity</span>
-      </div>
-    </div>
-    <div class="map-wrap">
-      <div class="map-svg-wrap">
+    <div class="map-svg-wrap">
+      <div class="map-inner">
         <svg id="india-map" viewBox="0 0 800 800" preserveAspectRatio="xMidYMid meet">
           <defs>
-            <radialGradient id="gG" cx="50%" cy="50%" r="50%">
-              <stop offset="0%" stop-color="rgba(255,107,61,0.03)"/>
+            <radialGradient id="ambGlow" cx="50%" cy="50%" r="50%">
+              <stop offset="0%" stop-color="rgba(224,90,40,0.04)"/>
               <stop offset="100%" stop-color="transparent"/>
             </radialGradient>
+            <filter id="stateGlow" x="-30%" y="-30%" width="160%" height="160%">
+              <feGaussianBlur in="SourceGraphic" stdDeviation="8" result="blur"/>
+              <feComposite in="SourceGraphic" in2="blur" operator="over"/>
+            </filter>
           </defs>
-          <rect width="800" height="800" fill="url(#gG)"/>
+          <rect width="800" height="800" fill="url(#ambGlow)"/>
+          <g id="map-glow"></g>
           <g id="map-states"></g>
           <g id="map-pulses"></g>
         </svg>
@@ -486,397 +601,425 @@ body::before{
   <!-- STATE PANEL -->
   <div class="state-panel" id="state-detail">
     <div class="panel-empty">
-      <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
-      <div class="t">Select a state</div>
-      <div class="s">Click any region on the map to open its narrative intelligence panel.</div>
+      <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1">
+        <circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01"/>
+      </svg>
+      <div class="pe-t">Select a state</div>
+      <div class="pe-s">Click any region on the map<br/>to open its narrative panel.</div>
     </div>
   </div>
 
 </div>
 
-<!-- NARRATIVE INTELLIGENCE ROW -->
-<div class="narrative-row">
-
-  <!-- RISING NARRATIVES -->
+<!-- NARRATIVE ROW -->
+<div class="nar-row">
   <div class="nar-card">
-    <div class="nar-card-header">
-      <div class="nar-card-title">Rising narratives</div>
-      <div class="nar-card-meta">Last 72 hours &middot; All states</div>
+    <div class="nc-head">
+      <div class="nc-title">Rising narratives</div>
+      <div class="nc-sub">72 hours &middot; all states</div>
     </div>
-    <div class="nar-card-body" id="rising-nar"></div>
+    <div class="nc-body" id="rising-nar"></div>
   </div>
-
-  <!-- DECLINING NARRATIVES -->
   <div class="nar-card">
-    <div class="nar-card-header">
-      <div class="nar-card-title">Declining narratives</div>
-      <div class="nar-card-meta">Last 72 hours &middot; All states</div>
+    <div class="nc-head">
+      <div class="nc-title">Declining narratives</div>
+      <div class="nc-sub">72 hours &middot; all states</div>
     </div>
-    <div class="nar-card-body" id="falling-nar"></div>
+    <div class="nc-body" id="falling-nar"></div>
   </div>
-
-  <!-- REGIONAL SHIFTS -->
   <div class="nar-card">
-    <div class="nar-card-header">
-      <div class="nar-card-title">Regional narrative shifts</div>
-      <div class="nar-card-meta">State-level evolution &middot; Last 30 days</div>
+    <div class="nc-head">
+      <div class="nc-title">Regional shifts</div>
+      <div class="nc-sub">State-level evolution &middot; 30 days</div>
     </div>
-    <div class="nar-card-body" id="regional-shifts"></div>
+    <div class="nc-body" id="regional-shifts"></div>
   </div>
-
 </div>
 
-<!-- FAVORITES -->
-<section class="favs-section">
-  <div class="sec-head">Tracked states</div>
-  <div class="fav-row" id="fav-row">
-    <div class="fav-empty">No states tracked. Click the bookmark icon on any state panel.</div>
+<!-- FAVS -->
+<section class="favs">
+  <div class="favs-label">Tracked states</div>
+  <div class="favs-row" id="fav-row">
+    <div class="favs-empty">No states tracked. Bookmark any state panel to follow its narrative evolution.</div>
   </div>
 </section>
 
 <div class="foot">
-  India Attention Map is an observational narrative intelligence platform. It tracks collective attention patterns from public data and does not infer political positions, predict elections, or endorse narratives. All signals reflect volume and momentum — not editorial significance.
+  India Attention Map is an observational platform. It tracks collective attention patterns from public data and does not infer political positions, predict elections, or endorse narratives.
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/topojson-client@3.1.0/dist/topojson-client.min.js"></script>
 <script>
-// ── API ──────────────────────────────────────────────────────
-const API_BASE=(location.hostname==='localhost'||location.hostname==='127.0.0.1')?'http://localhost:8000':'';
+var API_BASE=(location.hostname==='localhost'||location.hostname==='127.0.0.1')?'http://localhost:8000':'';
 
+// API
 async function fetchAllStates(){
   try{
-    const r=await fetch(API_BASE+'/api/states');
+    var r=await fetch(API_BASE+'/api/states');
     if(!r.ok) throw new Error('HTTP '+r.status);
-    const rows=await r.json();
+    var rows=await r.json();
     rows.forEach(function(row){
-      if(!STATE_DATA[row.name]) STATE_DATA[row.name]={...DEFAULT_STATE};
-      Object.assign(STATE_DATA[row.name],{attention:row.attention,delta:row.delta_24h,velocity:row.velocity,dominant_emotion:row.dominant_emotion,dominant_narrative:row.dominant_narrative});
+      if(!SD[row.name]) SD[row.name]=Object.assign({},DEFAULT);
+      Object.assign(SD[row.name],{attention:row.attention,delta:row.delta_24h,velocity:row.velocity,dominant_emotion:row.dominant_emotion,dominant_narrative:row.dominant_narrative});
     });
     applyLayer();
-    renderNarrativeMomentum();
+    renderMomentum();
   }catch(e){console.warn('[API]',e.message);}
 }
-
-async function fetchStateDetail(name){
+async function fetchDetail(name){
   try{
-    const r=await fetch(API_BASE+'/api/state/'+encodeURIComponent(name));
+    var r=await fetch(API_BASE+'/api/state/'+encodeURIComponent(name));
     if(!r.ok) throw new Error('HTTP '+r.status);
-    const d=await r.json();
-    STATE_DATA[name]={
+    var d=await r.json();
+    SD[name]={
       attention:d.attention,delta:d.delta_24h,velocity:d.velocity,
-      emotions:d.emotions||DEFAULT_STATE.emotions,
+      emotions:d.emotions||DEFAULT.emotions,
       narratives:(d.narratives||[]).map(function(n){return{name:n.name,val:n.val,dir:n.dir||'flat'};}),
       rising:d.rising||[],falling:d.falling||[],
-      summary:d.summary||DEFAULT_STATE.summary,
-      articles:d.articles||[],timeline:d.timeline||DEFAULT_STATE.timeline,
+      summary:d.summary||DEFAULT.summary,
+      articles:d.articles||[],timeline:d.timeline||DEFAULT.timeline,
+      narrativeHistory:DEFAULT.narrativeHistory,
     };
-    return STATE_DATA[name];
-  }catch(e){return getStateData(name);}
+    return SD[name];
+  }catch(e){return g(name);}
 }
-
-async function fetchSnapshot(){
+async function fetchSnap(){
   try{
-    const r=await fetch(API_BASE+'/api/snapshot/daily');
+    var r=await fetch(API_BASE+'/api/snapshot/daily');
     if(!r.ok) throw new Error('HTTP '+r.status);
-    const d=await r.json();
+    var d=await r.json();
     if(d.error) return;
-    const el=document.getElementById('live-count');
+    var el=document.getElementById('live-count');
     if(el&&d.total_signals) el.textContent=d.total_signals.toLocaleString();
-    const meta=document.getElementById('map-meta');
-    if(meta&&d.as_of) meta.textContent='30 states · Updated '+new Date(d.as_of).toLocaleTimeString('en-IN')+' · Signal-weighted';
+    var meta=document.getElementById('map-meta');
+    if(meta&&d.as_of) meta.textContent='30 states · updated '+new Date(d.as_of).toLocaleTimeString('en-IN');
   }catch(e){}
 }
-
 async function startPolling(){
-  await Promise.all([fetchAllStates(),fetchSnapshot()]);
+  await Promise.all([fetchAllStates(),fetchSnap()]);
   var n=0;
-  var fast=setInterval(async function(){
-    n++;
-    await fetchAllStates();
-    await fetchSnapshot();
-    if(selectedState) renderStatePanel(selectedState);
-    if(n>=12){
-      clearInterval(fast);
-      setInterval(async function(){await fetchAllStates();await fetchSnapshot();if(selectedState)renderStatePanel(selectedState);},300000);
-    }
+  var t=setInterval(async function(){
+    n++;await fetchAllStates();await fetchSnap();
+    if(SEL) renderPanel(SEL);
+    if(n>=12){clearInterval(t);setInterval(async function(){await fetchAllStates();await fetchSnap();if(SEL)renderPanel(SEL);},300000);}
   },15000);
 }
 
-// ── NARRATIVE DATA ───────────────────────────────────────────
-var NATIONAL_SHIFTS={
+// NARRATIVE DATA
+var SHIFTS={
   '3m':[
-    {from:'Inflation',fromNote:'easing nationally',to:'Border security',toNote:'surging post-incident'},
-    {from:'Election rhetoric',fromNote:'post-cycle fade',to:'Governance accountability',toNote:'steady national rise'},
-    {from:'Farmer protests',fromNote:'momentum lost',to:'Unemployment anxiety',toNote:'youth-signal surge'},
+    {fading:'Inflation',fadingNote:'easing nationally',rising:'Border security',risingNote:'post-incident surge'},
+    {fading:'Election rhetoric',fadingNote:'post-cycle fade',rising:'Governance accountability',risingNote:'steady rise'},
+    {fading:'Farmer protests',fadingNote:'momentum lost',rising:'Unemployment anxiety',risingNote:'youth signal surge'},
   ],
   '6m':[
-    {from:'Caste mobilisation',fromNote:'pre-election peak',to:'Corruption & scams',toNote:'accountability cycle'},
-    {from:'Religious nationalism',fromNote:'high plateau',to:'Economic anxiety',toNote:'cost-of-living surge'},
-    {from:'Infrastructure pride',fromNote:'ribbon-cutting done',to:'Law & order',toNote:'crime narrative rise'},
+    {fading:'Caste mobilisation',fadingNote:'pre-election peak',rising:'Corruption accountability',risingNote:'post-cycle push'},
+    {fading:'Religious nationalism',fadingNote:'plateau phase',rising:'Economic anxiety',risingNote:'cost-of-living'},
+    {fading:'Infrastructure pride',fadingNote:'ribbon-cutting done',rising:'Law & order',risingNote:'crime narrative rise'},
   ],
   '1y':[
-    {from:'Unemployment',fromNote:'12-month sustained',to:'Nationalism',toNote:'event-driven spikes'},
-    {from:'Pandemic recovery',fromNote:'faded by Q1',to:'Inflation',toNote:'dominated mid-year'},
-    {from:'Regional identity',fromNote:'language-led',to:'Security & borders',toNote:'geopolitical escalation'},
+    {fading:'Pandemic recovery',fadingNote:'faded early year',rising:'Inflation',risingNote:'dominated mid-year'},
+    {fading:'Regional identity',fadingNote:'language-led peak',rising:'Security & borders',risingNote:'geopolitical escalation'},
+    {fading:'Governance optimism',fadingNote:'policy honeymoon end',rising:'Corruption & scams',risingNote:'accountability cycle'},
   ],
 };
-
-var REGIONAL_SHIFTS=[
-  {state:'Tamil Nadu',from:'Regional identity',to:'Federal resource disputes',time:'3 weeks'},
-  {state:'Bihar',from:'Election rhetoric',to:'Unemployment & exam scams',time:'6 weeks'},
-  {state:'West Bengal',from:'Bypoll politics',to:'Law & order · Border',time:'4 weeks'},
-  {state:'Rajasthan',from:'Farmer protests',to:'Heat wave · Environment',time:'2 weeks'},
-  {state:'Karnataka',from:'Mining controversy',to:'Language signage politics',time:'3 weeks'},
-  {state:'Delhi',from:'Metro & infrastructure',to:'Air quality crisis',time:'10 days'},
-  {state:'Manipur',from:'Governance & cabinet',to:'Ethnic tensions · AFSPA',time:'5 weeks'},
-  {state:'Punjab',from:'Power crisis',to:'Border security · Drones',time:'3 weeks'},
+var REG_SHIFTS=[
+  {state:'Tamil Nadu',from:'Regional identity',to:'Federal resource disputes',time:'3 wks'},
+  {state:'Bihar',from:'Election rhetoric',to:'Unemployment & exam scams',time:'6 wks'},
+  {state:'West Bengal',from:'Bypoll politics',to:'Law & order · Border',time:'4 wks'},
+  {state:'Rajasthan',from:'Farmer protests',to:'Heat wave · Environment',time:'2 wks'},
+  {state:'Karnataka',from:'Mining controversy',to:'Language signage politics',time:'3 wks'},
+  {state:'Delhi',from:'Metro infrastructure',to:'Air quality crisis',time:'10 days'},
+  {state:'Manipur',from:'Governance & cabinet',to:'Ethnic tensions · AFSPA',time:'5 wks'},
+  {state:'Punjab',from:'Power crisis',to:'Border security · Drones',time:'3 wks'},
 ];
-
-var MOCK_RISING=[
+var MOCK_R=[
   {name:'Border security',states:'J&K · Punjab · Rajasthan',pct:'+41%'},
   {name:'Unemployment',states:'Bihar · UP · Jharkhand',pct:'+28%'},
   {name:'Language politics',states:'TN · Karnataka · MH',pct:'+22%'},
   {name:'Environmental crisis',states:'Delhi · Rajasthan · AP',pct:'+19%'},
   {name:'Ethnic tensions',states:'Manipur · Assam · WB',pct:'+17%'},
 ];
-var MOCK_FALLING=[
+var MOCK_F=[
   {name:'Election rhetoric',states:'National post-cycle',pct:'-38%'},
-  {name:'Inflation',states:'Easing nationally',pct:'-24%'},
+  {name:'Inflation pressure',states:'Easing nationally',pct:'-24%'},
   {name:'Farmer protests',states:'Momentum lost',pct:'-19%'},
   {name:'Infrastructure pride',states:'Ribbon-cutting done',pct:'-14%'},
   {name:'Religious festivals',states:'Post-season fade',pct:'-11%'},
 ];
 
 function renderStrip(period){
-  var data=NATIONAL_SHIFTS[period]||NATIONAL_SHIFTS['3m'];
-  var html='';
-  data.forEach(function(s,i){
-    if(i>0) html+='<div class="strip-divider"></div>';
-    html+=
-      '<div class="strip-row">'+
-        '<div class="strip-from">'+
-          '<div class="strip-label fall">Fading</div>'+
-          '<div class="strip-topic">'+s.from+'</div>'+
-          '<div class="strip-meta">'+s.fromNote+'</div>'+
-        '</div>'+
-        '<div class="strip-arrow">→</div>'+
-        '<div class="strip-to">'+
-          '<div class="strip-label rise">Rising</div>'+
-          '<div class="strip-topic">'+s.to+'</div>'+
-          '<div class="strip-meta">'+s.toNote+'</div>'+
-        '</div>'+
-      '</div>';
-  });
-  document.getElementById('strip-body').innerHTML=html;
+  var data=SHIFTS[period]||SHIFTS['3m'];
+  var fEl=document.getElementById('strip-fading');
+  var rEl=document.getElementById('strip-rising');
+  fEl.innerHTML=data.map(function(s){
+    return '<div class="strip-item"><div><div class="strip-topic" style="color:var(--faint)">'+s.fading+'</div><div class="strip-note">'+s.fadingNote+'</div></div></div>';
+  }).join('');
+  rEl.innerHTML=data.map(function(s){
+    return '<div class="strip-item"><div><div class="strip-topic">'+s.rising+'</div><div class="strip-note">'+s.risingNote+'</div></div></div>';
+  }).join('');
 }
-
-function renderNarrativeMomentum(){
-  var narCount={};
-  Object.values(STATE_DATA).forEach(function(s){
-    (s.narratives||[]).forEach(function(n){narCount[n.name]=(narCount[n.name]||0)+n.val;});
+document.querySelectorAll('.strip-tab').forEach(function(tab){
+  tab.addEventListener('click',function(){
+    document.querySelectorAll('.strip-tab').forEach(function(t){t.classList.remove('active');});
+    tab.classList.add('active');renderStrip(tab.dataset.period);
   });
-  var sorted=Object.entries(narCount).sort(function(a,b){return b[1]-a[1];});
-  var rising=sorted.slice(0,5);
-  var falling=sorted.slice(-5).reverse();
+});
 
-  var rEl=document.getElementById('rising-nar');
-  var fEl=document.getElementById('falling-nar');
-  var max=rising.length?rising[0][1]:100;
+function renderMomentum(){
+  var nc={};
+  Object.values(SD).forEach(function(s){(s.narratives||[]).forEach(function(n){nc[n.name]=(nc[n.name]||0)+n.val;});});
+  var sorted=Object.entries(nc).sort(function(a,b){return b[1]-a[1];});
+  var rising=sorted.slice(0,5),falling=sorted.slice(-5).reverse();
+  var mx=rising.length?rising[0][1]:100;
+
+  var rEl=document.getElementById('rising-nar'),fEl=document.getElementById('falling-nar');
 
   if(rising.length){
     rEl.innerHTML=rising.map(function(n,i){
-      return '<div class="mom-item">'+
-        '<span class="mom-rank">'+(i+1)+'</span>'+
-        '<div class="mom-info"><div class="mom-name">'+n[0]+'</div></div>'+
-        '<span class="mom-pct rise">↑</span>'+
-        '</div>'+
-        '<div class="mom-track"><div class="mom-fill" style="width:'+Math.min(100,n[1]/max*100)+'%;background:var(--rise);opacity:0.55"></div></div>';
+      return '<div class="mom-it"><span class="mom-rk">'+(i+1)+'</span><div class="mom-inf"><div class="mom-nm">'+n[0]+'</div></div><span class="mom-pc r">↑</span></div>'+
+        '<div class="mom-tr"><div class="mom-fl" style="width:'+Math.min(100,n[1]/mx*100)+'%;background:var(--rise);opacity:0.5"></div></div>';
     }).join('');
   }else{
-    rEl.innerHTML=MOCK_RISING.map(function(n,i){
-      return '<div class="mom-item">'+
-        '<span class="mom-rank">'+(i+1)+'</span>'+
-        '<div class="mom-info"><div class="mom-name">'+n.name+'</div><div class="mom-states">'+n.states+'</div></div>'+
-        '<span class="mom-pct rise">'+n.pct+'</span>'+
-        '</div>'+
-        '<div class="mom-track"><div class="mom-fill" style="width:'+parseInt(n.pct)+'%;background:var(--rise);opacity:0.55"></div></div>';
+    rEl.innerHTML=MOCK_R.map(function(n,i){
+      return '<div class="mom-it"><span class="mom-rk">'+(i+1)+'</span><div class="mom-inf"><div class="mom-nm">'+n.name+'</div><div class="mom-st">'+n.states+'</div></div><span class="mom-pc r">'+n.pct+'</span></div>'+
+        '<div class="mom-tr"><div class="mom-fl" style="width:'+parseInt(n.pct)+'%;background:var(--rise);opacity:0.5"></div></div>';
     }).join('');
   }
-
   if(falling.length){
     fEl.innerHTML=falling.map(function(n,i){
-      return '<div class="mom-item">'+
-        '<span class="mom-rank">'+(i+1)+'</span>'+
-        '<div class="mom-info"><div class="mom-name">'+n[0]+'</div></div>'+
-        '<span class="mom-pct fall">↓</span>'+
-        '</div>'+
-        '<div class="mom-track"><div class="mom-fill" style="width:'+Math.min(100,n[1]/max*100)+'%;background:var(--fall);opacity:0.55"></div></div>';
+      return '<div class="mom-it"><span class="mom-rk">'+(i+1)+'</span><div class="mom-inf"><div class="mom-nm">'+n[0]+'</div></div><span class="mom-pc f">↓</span></div>'+
+        '<div class="mom-tr"><div class="mom-fl" style="width:'+Math.min(100,n[1]/mx*100)+'%;background:var(--fall);opacity:0.5"></div></div>';
     }).join('');
   }else{
-    fEl.innerHTML=MOCK_FALLING.map(function(n,i){
-      return '<div class="mom-item">'+
-        '<span class="mom-rank">'+(i+1)+'</span>'+
-        '<div class="mom-info"><div class="mom-name">'+n.name+'</div><div class="mom-states">'+n.states+'</div></div>'+
-        '<span class="mom-pct fall">'+n.pct+'</span>'+
-        '</div>'+
-        '<div class="mom-track"><div class="mom-fill" style="width:'+Math.abs(parseInt(n.pct))+'%;background:var(--fall);opacity:0.55"></div></div>';
+    fEl.innerHTML=MOCK_F.map(function(n,i){
+      return '<div class="mom-it"><span class="mom-rk">'+(i+1)+'</span><div class="mom-inf"><div class="mom-nm">'+n.name+'</div><div class="mom-st">'+n.states+'</div></div><span class="mom-pc f">'+n.pct+'</span></div>'+
+        '<div class="mom-tr"><div class="mom-fl" style="width:'+Math.abs(parseInt(n.pct))+'%;background:var(--fall);opacity:0.5"></div></div>';
     }).join('');
   }
-
-  document.getElementById('regional-shifts').innerHTML=REGIONAL_SHIFTS.map(function(s){
-    return '<div class="reg-item" onclick="selectState(\''+s.state+'\')">'+
+  document.getElementById('regional-shifts').innerHTML=REG_SHIFTS.map(function(s){
+    return '<div class="reg-it" onclick="select_(\''+s.state+'\')">'+
       '<span class="reg-badge">'+s.state+'</span>'+
-      '<div class="reg-flow">'+
-        '<span class="reg-from">'+s.from+'</span>'+
-        '<span class="reg-arr">→</span>'+
-        '<span class="reg-to">'+s.to+'</span>'+
-      '</div>'+
-      '<span class="reg-time">'+s.time+'</span>'+
+      '<div class="reg-fl"><span class="reg-from">'+s.from+'</span><span class="reg-arr">→</span><span class="reg-to">'+s.to+'</span></div>'+
+      '<span class="reg-tm">'+s.time+'</span>'+
     '</div>';
   }).join('');
 }
 
-// time tab switcher
-document.querySelectorAll('.time-tab').forEach(function(tab){
-  tab.addEventListener('click',function(){
-    document.querySelectorAll('.time-tab').forEach(function(t){t.classList.remove('active');});
-    tab.classList.add('active');
-    renderStrip(tab.dataset.period);
-  });
-});
-
-// ── STATE DATA ───────────────────────────────────────────────
-var STATE_DATA={
-  "Bihar":{attention:87,delta:6,velocity:0.34,emotions:{anxiety:32,anger:28,hope:14,pride:8,fear:18},narratives:[{name:"Unemployment",val:41,dir:"up"},{name:"Corruption",val:28,dir:"up"},{name:"Caste politics",val:12,dir:"flat"},{name:"Education",val:11,dir:"up"},{name:"Migration",val:8,dir:"flat"}],rising:[{t:"Exam scam outrage",pct:"+47%"},{t:"Migrant return",pct:"+22%"}],falling:[{t:"Election speeches",pct:"-31%"}],articles:[{src:"Dainik Bhaskar",txt:"Patna students stage protest demanding cancellation of exam"},{src:"The Hindu",txt:"Bihar's youth unemployment crisis intensifies as private sector hiring slows"},{src:"PTI",txt:"State announces high-level inquiry into alleged paper leak"}],summary:"Bihar's narrative shifted sharply toward unemployment and exam anxiety. The corruption-education intersection is dominating both Hindi and English press.",timeline:[62,64,66,71,74,78,81,87]},
-  "Maharashtra":{attention:62,delta:-8,velocity:-0.12,emotions:{anxiety:18,anger:22,hope:16,pride:24,fear:20},narratives:[{name:"Language politics",val:24,dir:"up"},{name:"Infrastructure",val:21,dir:"flat"},{name:"Farmer issues",val:18,dir:"down"},{name:"Regional identity",val:19,dir:"up"},{name:"Economy",val:18,dir:"down"}],rising:[{t:"Marathi language row",pct:"+19%"}],falling:[{t:"Onion prices",pct:"-24%"}],articles:[{src:"Lokmat",txt:"Language enforcement debate reignites in suburban Mumbai"},{src:"Indian Express",txt:"Onion prices stabilize as farmer protest activity subsides"}],summary:"Maharashtra cooling as economic anxieties ease. Narrative rotating toward language and regional identity.",timeline:[78,75,73,70,69,66,64,62]},
-  "Uttar Pradesh":{attention:78,delta:3,velocity:0.08,emotions:{anxiety:22,anger:24,hope:18,pride:22,fear:14},narratives:[{name:"Law & order",val:26,dir:"up"},{name:"Religion",val:22,dir:"flat"},{name:"Infrastructure",val:18,dir:"up"},{name:"Governance",val:16,dir:"flat"},{name:"Caste politics",val:18,dir:"flat"}],rising:[{t:"Expressway opening",pct:"+28%"}],falling:[{t:"Festival logistics",pct:"-18%"}],articles:[{src:"Dainik Jagran",txt:"Ganga Expressway extension inaugurated"},{src:"Amar Ujala",txt:"Ayodhya tourism crosses monthly record"}],summary:"UP shows a stable high-baseline — law & order and infrastructure anchor the narrative. Religious sentiment steady.",timeline:[72,73,74,75,76,77,76,78]},
-  "Tamil Nadu":{attention:71,delta:5,velocity:0.21,emotions:{anxiety:14,anger:26,hope:18,pride:30,fear:12},narratives:[{name:"Language politics",val:32,dir:"up"},{name:"Federalism",val:21,dir:"up"},{name:"Education",val:16,dir:"up"},{name:"Economy",val:16,dir:"flat"},{name:"Regional identity",val:15,dir:"up"}],rising:[{t:"NEP three-language row",pct:"+38%"},{t:"State funds dispute",pct:"+21%"}],falling:[{t:"Cyclone aftermath",pct:"-29%"}],articles:[{src:"The Hindu",txt:"Three-language formula debate enters fresh phase"},{src:"Dinamalar",txt:"Student federations pass resolutions against language policy"}],summary:"Tamil Nadu pivoted firmly to language politics and federalism. The three-language debate is the single largest signal in Tamil-language media.",timeline:[64,65,66,68,69,70,70,71]},
-  "West Bengal":{attention:74,delta:4,velocity:0.15,emotions:{anxiety:20,anger:28,hope:14,pride:16,fear:22},narratives:[{name:"Law & order",val:24,dir:"up"},{name:"Religion",val:19,dir:"up"},{name:"Border issues",val:18,dir:"up"},{name:"Corruption",val:22,dir:"flat"},{name:"Governance",val:17,dir:"flat"}],rising:[{t:"Border infiltration debate",pct:"+24%"}],falling:[{t:"Bypoll results",pct:"-22%"}],articles:[{src:"Anandabazar",txt:"BSF and state police escalate coordination near Bongaon"},{src:"Telegraph India",txt:"SSC recruitment case: CBI files fresh charge sheet"}],summary:"Bengal heavy on law-and-order and border narratives. School recruitment case continues generating coverage.",timeline:[68,69,70,71,72,73,73,74]},
-  "Karnataka":{attention:68,delta:2,velocity:0.09,emotions:{anxiety:16,anger:20,hope:22,pride:24,fear:18},narratives:[{name:"Language politics",val:22,dir:"up"},{name:"Economy / IT",val:24,dir:"up"},{name:"Water disputes",val:18,dir:"flat"},{name:"Infrastructure",val:19,dir:"up"},{name:"Regional identity",val:17,dir:"up"}],rising:[{t:"Kannada signage rule",pct:"+22%"}],falling:[{t:"Mining inquiry",pct:"-13%"}],articles:[{src:"Deccan Herald",txt:"Bengaluru civic body steps up Kannada signage enforcement"}],summary:"Karnataka balancing economic optimism with regional-identity politics. Language enforcement coverage rising statewide.",timeline:[64,65,65,66,67,67,68,68]},
-  "Kerala":{attention:54,delta:1,velocity:0.04,emotions:{anxiety:14,anger:18,hope:22,pride:26,fear:20},narratives:[{name:"Governance",val:22,dir:"flat"},{name:"Education",val:20,dir:"up"},{name:"Environment",val:18,dir:"up"},{name:"Economy",val:22,dir:"down"},{name:"Religion",val:18,dir:"flat"}],rising:[{t:"Wayanad rehabilitation",pct:"+16%"}],falling:[{t:"Tourism debate",pct:"-9%"}],articles:[{src:"Mathrubhumi",txt:"Wayanad rehabilitation phase two faces land acquisition delays"}],summary:"Kerala maintains moderate stable attention. Wayanad recovery steady. Economic anxiety around remittances rising slowly.",timeline:[50,51,52,52,53,53,54,54]},
-  "Delhi":{attention:81,delta:9,velocity:0.27,emotions:{anxiety:28,anger:26,hope:12,pride:14,fear:20},narratives:[{name:"Governance",val:26,dir:"up"},{name:"Environment / Air",val:24,dir:"up"},{name:"Law & order",val:18,dir:"up"},{name:"Infrastructure",val:16,dir:"flat"},{name:"Corruption",val:16,dir:"up"}],rising:[{t:"Air quality emergency",pct:"+41%"},{t:"L-G vs CM standoff",pct:"+23%"}],falling:[{t:"Metro fare hike",pct:"-12%"}],articles:[{src:"Indian Express",txt:"Delhi AQI re-enters severe band; GRAP Stage 3 activated"},{src:"Hindustan Times",txt:"L-G writes to CM citing administrative delays"}],summary:"Delhi climbing sharply on off-season air quality emergency and renewed governance standoff. Anxiety dominant for second week.",timeline:[68,70,72,74,76,78,79,81]},
-  "Gujarat":{attention:59,delta:-2,velocity:-0.05,emotions:{anxiety:14,anger:14,hope:24,pride:32,fear:16},narratives:[{name:"Economy",val:30,dir:"up"},{name:"Infrastructure",val:22,dir:"flat"},{name:"Religion",val:14,dir:"flat"},{name:"Governance",val:18,dir:"flat"},{name:"Border issues",val:16,dir:"up"}],rising:[{t:"Semiconductor plant",pct:"+18%"}],falling:[{t:"Statue tourism",pct:"-14%"}],articles:[{src:"Sandesh",txt:"Dholera SIR adds semiconductor anchor tenants"}],summary:"Gujarat narrative remains economic and infrastructure-led. Pride is the dominant emotional tone.",timeline:[62,61,61,60,60,60,59,59]},
-  "Rajasthan":{attention:57,delta:1,velocity:0.03,emotions:{anxiety:18,anger:18,hope:18,pride:20,fear:26},narratives:[{name:"Border issues",val:22,dir:"up"},{name:"Farmer issues",val:20,dir:"flat"},{name:"Environment",val:20,dir:"up"},{name:"Economy",val:18,dir:"flat"},{name:"Religion",val:20,dir:"flat"}],rising:[{t:"Heat wave warnings",pct:"+34%"},{t:"Western border alerts",pct:"+19%"}],falling:[{t:"Tourism off-season",pct:"-22%"}],articles:[{src:"Rajasthan Patrika",txt:"Border districts see fresh security drills"}],summary:"Rajasthan attention rising on environment — heat wave coverage spiking. Border issues a steady secondary narrative.",timeline:[55,55,56,56,56,57,57,57]},
-  "Madhya Pradesh":{attention:52,delta:0,velocity:0.01,emotions:{anxiety:18,anger:16,hope:20,pride:22,fear:24},narratives:[{name:"Farmer issues",val:24,dir:"up"},{name:"Religion",val:20,dir:"flat"},{name:"Governance",val:18,dir:"flat"},{name:"Economy",val:18,dir:"flat"},{name:"Infrastructure",val:20,dir:"up"}],rising:[{t:"Soybean MSP debate",pct:"+14%"}],falling:[{t:"Cabinet expansion",pct:"-18%"}],articles:[{src:"Patrika",txt:"Soybean growers in Malwa demand MSP review"}],summary:"MP stable with agriculture-economy narratives dominating. No sharp movement this cycle.",timeline:[51,52,52,52,52,52,52,52]},
-  "Punjab":{attention:66,delta:3,velocity:0.11,emotions:{anxiety:22,anger:26,hope:12,pride:22,fear:18},narratives:[{name:"Farmer issues",val:28,dir:"up"},{name:"Border issues",val:22,dir:"up"},{name:"Law & order",val:18,dir:"up"},{name:"Economy",val:14,dir:"flat"},{name:"Religion",val:18,dir:"flat"}],rising:[{t:"Stubble policy",pct:"+21%"},{t:"Border drone sightings",pct:"+17%"}],falling:[{t:"Power crisis",pct:"-14%"}],articles:[{src:"Punjabi Tribune",txt:"Stubble management plan unveiled ahead of paddy harvest"}],summary:"Punjab rising on twin tracks: agriculture policy and border security. Anger remains dominant.",timeline:[62,63,63,64,64,65,65,66]},
-  "Haryana":{attention:61,delta:2,velocity:0.07,emotions:{anxiety:18,anger:22,hope:18,pride:22,fear:20},narratives:[{name:"Farmer issues",val:22,dir:"up"},{name:"Law & order",val:20,dir:"up"},{name:"Economy",val:18,dir:"flat"},{name:"Caste politics",val:20,dir:"flat"},{name:"Sports",val:20,dir:"up"}],rising:[{t:"NCR pollution spillover",pct:"+19%"}],falling:[{t:"Real estate",pct:"-8%"}],articles:[{src:"Dainik Jagran",txt:"Haryana wrestlers reach national finals"}],summary:"Haryana shows balanced narrative mix. Sports pride and farmer issues co-anchor public attention.",timeline:[58,59,59,60,60,61,61,61]},
-  "Telangana":{attention:63,delta:4,velocity:0.13,emotions:{anxiety:16,anger:18,hope:22,pride:22,fear:22},narratives:[{name:"Economy / IT",val:24,dir:"up"},{name:"Governance",val:20,dir:"up"},{name:"Water disputes",val:18,dir:"up"},{name:"Education",val:18,dir:"flat"},{name:"Regional identity",val:20,dir:"up"}],rising:[{t:"Hyderabad cluster expansion",pct:"+16%"}],falling:[{t:"Old city redevelopment",pct:"-11%"}],articles:[{src:"Sakshi",txt:"Telangana adds investment commitments at global summit"}],summary:"Telangana rising on economic and governance tracks. Hyderabad tech narrative dominant.",timeline:[58,59,60,60,61,62,62,63]},
-  "Andhra Pradesh":{attention:58,delta:2,velocity:0.08,emotions:{anxiety:18,anger:18,hope:20,pride:22,fear:22},narratives:[{name:"Economy",val:22,dir:"up"},{name:"Capital row",val:20,dir:"up"},{name:"Water disputes",val:18,dir:"flat"},{name:"Governance",val:20,dir:"flat"},{name:"Religion",val:20,dir:"flat"}],rising:[{t:"Amaravati restart",pct:"+22%"}],falling:[{t:"Liquor policy",pct:"-9%"}],articles:[{src:"Andhra Jyothy",txt:"Amaravati capital city construction restart formally approved"}],summary:"Andhra rising on Amaravati restart announcement. Pride and hope are rising emotional tones.",timeline:[55,56,56,57,57,58,58,58]},
-  "Odisha":{attention:49,delta:-1,velocity:-0.02,emotions:{anxiety:16,anger:14,hope:24,pride:24,fear:22},narratives:[{name:"Economy",val:22,dir:"up"},{name:"Environment",val:22,dir:"up"},{name:"Infrastructure",val:20,dir:"flat"},{name:"Governance",val:18,dir:"flat"},{name:"Tribal issues",val:18,dir:"flat"}],rising:[{t:"Cyclone preparedness",pct:"+18%"}],falling:[{t:"Mining bid round",pct:"-12%"}],articles:[{src:"Dharitri",txt:"Pre-monsoon cyclone drill across coastal districts"}],summary:"Odisha quiet, dominated by environmental preparedness. Cooling marginally.",timeline:[50,50,50,50,49,49,49,49]},
-  "Jharkhand":{attention:56,delta:3,velocity:0.12,emotions:{anxiety:20,anger:22,hope:14,pride:16,fear:28},narratives:[{name:"Tribal issues",val:24,dir:"up"},{name:"Mining / Economy",val:22,dir:"up"},{name:"Law & order",val:20,dir:"up"},{name:"Governance",val:16,dir:"flat"},{name:"Migration",val:18,dir:"up"}],rising:[{t:"Forest rights dispute",pct:"+24%"}],falling:[{t:"Coal block auction",pct:"-11%"}],articles:[{src:"Prabhat Khabar",txt:"Tribal organizations stage rally on land rights"}],summary:"Jharkhand climbing on tribal land rights and mining-economy intersections.",timeline:[52,53,54,54,55,55,56,56]},
-  "Chhattisgarh":{attention:51,delta:1,velocity:0.04,emotions:{anxiety:18,anger:18,hope:18,pride:20,fear:26},narratives:[{name:"Law & order",val:24,dir:"up"},{name:"Tribal issues",val:22,dir:"flat"},{name:"Economy",val:18,dir:"flat"},{name:"Governance",val:18,dir:"flat"},{name:"Environment",val:18,dir:"flat"}],rising:[{t:"Bastar operations",pct:"+16%"}],falling:[{t:"Forest auction",pct:"-9%"}],articles:[{src:"Patrika",txt:"Security operations in Bastar lead to record surrender numbers"}],summary:"Chhattisgarh anchored in Bastar security operations. Fear dominant in southern districts.",timeline:[50,50,50,50,51,51,51,51]},
-  "Assam":{attention:60,delta:3,velocity:0.11,emotions:{anxiety:22,anger:20,hope:18,pride:20,fear:20},narratives:[{name:"Border issues",val:22,dir:"up"},{name:"Religion",val:20,dir:"up"},{name:"Environment / Floods",val:20,dir:"up"},{name:"Economy",val:18,dir:"flat"},{name:"Regional identity",val:20,dir:"up"}],rising:[{t:"NRC update push",pct:"+17%"}],falling:[{t:"Tea industry",pct:"-8%"}],articles:[{src:"Asomiya Pratidin",txt:"State announces fresh push on NRC verification timelines"}],summary:"Assam rising on documentation politics and flood preparedness.",timeline:[57,58,58,59,59,60,60,60]},
-  "Himachal Pradesh":{attention:38,delta:0,velocity:0,emotions:{anxiety:16,anger:14,hope:24,pride:28,fear:18},narratives:[{name:"Tourism",val:26,dir:"flat"},{name:"Environment",val:22,dir:"up"},{name:"Infrastructure",val:18,dir:"flat"},{name:"Governance",val:16,dir:"flat"},{name:"Education",val:18,dir:"flat"}],rising:[{t:"Char Dham road work",pct:"+11%"}],falling:[{t:"Hotel rate cap",pct:"-7%"}],articles:[{src:"Amar Ujala",txt:"Tourist arrivals to hill stations rise ahead of summer peak"}],summary:"Himachal in low-attention summer cadence. Tourism economy dominates.",timeline:[38,38,38,38,38,38,38,38]},
-  "Uttarakhand":{attention:41,delta:1,velocity:0.03,emotions:{anxiety:16,anger:14,hope:22,pride:28,fear:20},narratives:[{name:"Religion / Pilgrimage",val:26,dir:"up"},{name:"Environment",val:22,dir:"up"},{name:"Tourism",val:20,dir:"flat"},{name:"Governance",val:16,dir:"flat"},{name:"Infrastructure",val:16,dir:"flat"}],rising:[{t:"Char Dham yatra prep",pct:"+19%"}],falling:[{t:"Power tariff debate",pct:"-9%"}],articles:[{src:"Hindustan Hindi",txt:"Char Dham yatra registrations cross last year's record"}],summary:"Uttarakhand steady, rising on pilgrimage and tourism. Pride dominant.",timeline:[39,40,40,40,41,41,41,41]},
-  "Manipur":{attention:64,delta:5,velocity:0.19,emotions:{anxiety:28,anger:26,hope:10,pride:14,fear:22},narratives:[{name:"Law & order",val:30,dir:"up"},{name:"Border issues",val:22,dir:"up"},{name:"Identity / Ethnic",val:24,dir:"up"},{name:"Governance",val:14,dir:"flat"},{name:"Migration",val:10,dir:"up"}],rising:[{t:"Ethnic tensions resurface",pct:"+27%"},{t:"AFSPA debate",pct:"+14%"}],falling:[{t:"Cabinet shuffle talk",pct:"-13%"}],articles:[{src:"Imphal Free Press",txt:"Fresh tensions reported in valley-hills border villages"}],summary:"Manipur rising sharply on ethnic-identity narratives. Anxiety and anger dominate.",timeline:[55,57,59,60,61,62,63,64]},
-  "Jammu and Kashmir":{attention:72,delta:4,velocity:0.17,emotions:{anxiety:22,anger:22,hope:18,pride:18,fear:20},narratives:[{name:"Law & order",val:26,dir:"up"},{name:"Border issues",val:24,dir:"up"},{name:"Tourism",val:18,dir:"up"},{name:"Governance",val:16,dir:"flat"},{name:"Identity",val:16,dir:"flat"}],rising:[{t:"Tourism arrivals high",pct:"+21%"},{t:"LoC incidents",pct:"+15%"}],falling:[{t:"Statehood debate",pct:"-9%"}],articles:[{src:"Greater Kashmir",txt:"Tourist arrivals to Pahalgam, Gulmarg cross seasonal record"},{src:"Daily Excelsior",txt:"LoC remains active; security forces respond to fresh incident"}],summary:"J&K on twin tracks — record tourism arrivals and renewed LoC incidents.",timeline:[65,67,68,69,70,71,72,72]},
-  "Goa":{attention:34,delta:-1,velocity:-0.04,emotions:{anxiety:14,anger:12,hope:22,pride:30,fear:22},narratives:[{name:"Tourism",val:30,dir:"down"},{name:"Environment",val:22,dir:"up"},{name:"Economy",val:18,dir:"flat"},{name:"Governance",val:16,dir:"flat"},{name:"Infrastructure",val:14,dir:"flat"}],rising:[{t:"Coastal zone enforcement",pct:"+12%"}],falling:[{t:"Tourist arrivals",pct:"-21%"}],articles:[{src:"Herald Goa",txt:"CRZ enforcement drive begins in north Goa"}],summary:"Goa in offseason. Coastal regulation enforcement the only rising signal.",timeline:[36,36,35,35,34,34,34,34]},
-  "Sikkim":{attention:22,delta:0,velocity:0,emotions:{anxiety:14,anger:10,hope:26,pride:28,fear:22},narratives:[{name:"Environment",val:30,dir:"up"},{name:"Tourism",val:22,dir:"flat"},{name:"Border issues",val:18,dir:"flat"},{name:"Governance",val:16,dir:"flat"},{name:"Economy",val:14,dir:"flat"}],rising:[{t:"Glacier monitoring",pct:"+9%"}],falling:[],articles:[{src:"Sikkim Express",txt:"Glacier survey shows accelerated retreat in north Sikkim"}],summary:"Sikkim minimal national attention. Environment-focused narratives dominate.",timeline:[22,22,22,22,22,22,22,22]},
-  "Nagaland":{attention:28,delta:0,velocity:0.01,emotions:{anxiety:18,anger:14,hope:20,pride:24,fear:24},narratives:[{name:"Border issues",val:22,dir:"flat"},{name:"Identity",val:24,dir:"flat"},{name:"Economy",val:18,dir:"flat"},{name:"Governance",val:18,dir:"flat"},{name:"Environment",val:18,dir:"flat"}],rising:[{t:"Naga framework agreement",pct:"+8%"}],falling:[],articles:[{src:"Morung Express",txt:"Framework agreement implementation discussions resume"}],summary:"Nagaland quiet. Identity and framework narratives steady but low-volume.",timeline:[28,28,28,28,28,28,28,28]},
-  "Mizoram":{attention:14,delta:0,velocity:0,emotions:{anxiety:10,anger:8,hope:30,pride:32,fear:20},narratives:[{name:"Governance",val:24,dir:"flat"},{name:"Identity",val:20,dir:"flat"},{name:"Economy",val:18,dir:"flat"},{name:"Border issues",val:20,dir:"flat"},{name:"Environment",val:18,dir:"flat"}],rising:[{t:"Cross-border refugee policy",pct:"+6%"}],falling:[],articles:[{src:"Vanglaini",txt:"State updates registration norms for cross-border refugees"}],summary:"Mizoram quietest state. Minimal signal volume.",timeline:[14,14,14,14,14,14,14,14]},
-  "Tripura":{attention:31,delta:1,velocity:0.04,emotions:{anxiety:18,anger:14,hope:22,pride:22,fear:24},narratives:[{name:"Border issues",val:24,dir:"up"},{name:"Economy",val:20,dir:"flat"},{name:"Governance",val:18,dir:"flat"},{name:"Identity",val:20,dir:"flat"},{name:"Infrastructure",val:18,dir:"flat"}],rising:[{t:"Cross-border trade route",pct:"+11%"}],falling:[{t:"Tribal council meet",pct:"-7%"}],articles:[{src:"Tripura Times",txt:"New cross-border trade corridor with Bangladesh announced"}],summary:"Tripura slowly rising on cross-border economic narratives.",timeline:[30,30,30,31,31,31,31,31]},
-  "Meghalaya":{attention:26,delta:0,velocity:0,emotions:{anxiety:14,anger:12,hope:24,pride:28,fear:22},narratives:[{name:"Environment",val:24,dir:"up"},{name:"Tourism",val:22,dir:"flat"},{name:"Identity",val:20,dir:"flat"},{name:"Economy",val:16,dir:"flat"},{name:"Governance",val:18,dir:"flat"}],rising:[{t:"Living root bridge UNESCO push",pct:"+10%"}],falling:[],articles:[{src:"Shillong Times",txt:"State nominates Khasi living root bridges for UNESCO listing"}],summary:"Meghalaya environment and tourism-led. Low overall national attention.",timeline:[26,26,26,26,26,26,26,26]},
-  "Arunachal Pradesh":{attention:36,delta:2,velocity:0.09,emotions:{anxiety:18,anger:16,hope:18,pride:24,fear:24},narratives:[{name:"Border issues",val:30,dir:"up"},{name:"Infrastructure",val:22,dir:"up"},{name:"Identity",val:18,dir:"flat"},{name:"Environment",val:16,dir:"flat"},{name:"Governance",val:14,dir:"flat"}],rising:[{t:"Border infrastructure push",pct:"+22%"}],falling:[{t:"Tourism circuit launch",pct:"-8%"}],articles:[{src:"Arunachal Times",txt:"Border infrastructure projects fast-tracked across Tawang sector"}],summary:"Arunachal rising on border infrastructure and naming-controversy narratives.",timeline:[33,34,34,35,35,36,36,36]},
+// STATE DATA
+var SD={
+  "Bihar":{attention:87,delta:6,velocity:0.34,emotions:{anxiety:32,anger:28,hope:14,pride:8,fear:18},
+    narratives:[{name:"Unemployment",val:41,dir:"up"},{name:"Corruption",val:28,dir:"up"},{name:"Caste politics",val:12,dir:"flat"},{name:"Education",val:11,dir:"up"},{name:"Migration",val:8,dir:"flat"}],
+    rising:[{t:"Exam scam outrage",pct:"+47%"},{t:"Migrant return",pct:"+22%"}],falling:[{t:"Election speeches",pct:"-31%"}],
+    articles:[{src:"Dainik Bhaskar",txt:"Patna students stage protest demanding cancellation of exam"},{src:"The Hindu",txt:"Bihar's youth unemployment crisis intensifies"},{src:"PTI",txt:"State announces inquiry into alleged paper leak"}],
+    summary:"Bihar's focus has pivoted from electoral noise to deep structural anxieties — unemployment, exam failures, and migration. The youth narrative is now dominant.",
+    timeline:[62,64,66,71,74,78,81,87],
+    narrativeHistory:[{topic:"Election rhetoric",when:"6 months ago",cls:"past"},{topic:"Exam scam outrage",when:"3 months ago",cls:"past"},{topic:"Youth unemployment",when:"6 weeks ago",cls:"recent"},{topic:"Migration anxiety",when:"Now",cls:"current"}]},
+  "Maharashtra":{attention:62,delta:-8,velocity:-0.12,emotions:{anxiety:18,anger:22,hope:16,pride:24,fear:20},
+    narratives:[{name:"Language politics",val:24,dir:"up"},{name:"Infrastructure",val:21,dir:"flat"},{name:"Farmer issues",val:18,dir:"down"},{name:"Regional identity",val:19,dir:"up"},{name:"Economy",val:18,dir:"down"}],
+    rising:[{t:"Marathi language row",pct:"+19%"}],falling:[{t:"Onion prices",pct:"-24%"}],
+    articles:[{src:"Lokmat",txt:"Language enforcement debate reignites in suburban Mumbai"},{src:"Indian Express",txt:"Onion prices stabilize as farmer protest activity subsides"}],
+    summary:"Maharashtra is cooling as economic anxieties ease. The narrative is rotating toward language identity and regional politics.",
+    timeline:[78,75,73,70,69,66,64,62],
+    narrativeHistory:[{topic:"Coalition politics",when:"8 months ago",cls:"past"},{topic:"Farmer distress",when:"4 months ago",cls:"past"},{topic:"Onion price crisis",when:"2 months ago",cls:"recent"},{topic:"Language & identity",when:"Now",cls:"current"}]},
+  "Uttar Pradesh":{attention:78,delta:3,velocity:0.08,emotions:{anxiety:22,anger:24,hope:18,pride:22,fear:14},
+    narratives:[{name:"Law & order",val:26,dir:"up"},{name:"Religion",val:22,dir:"flat"},{name:"Infrastructure",val:18,dir:"up"},{name:"Governance",val:16,dir:"flat"},{name:"Caste politics",val:18,dir:"flat"}],
+    rising:[{t:"Expressway opening",pct:"+28%"}],falling:[{t:"Festival logistics",pct:"-18%"}],
+    articles:[{src:"Dainik Jagran",txt:"Ganga Expressway extension inaugurated"},{src:"Amar Ujala",txt:"Ayodhya tourism crosses monthly record"}],
+    summary:"UP maintains a high-baseline pattern. Law & order and infrastructure dominate the narrative — a stable duality that has persisted for months.",
+    timeline:[72,73,74,75,76,77,76,78],
+    narrativeHistory:[{topic:"Election campaigning",when:"9 months ago",cls:"past"},{topic:"Religious infrastructure",when:"5 months ago",cls:"past"},{topic:"Law & order push",when:"3 months ago",cls:"recent"},{topic:"Infrastructure pride",when:"Now",cls:"current"}]},
+  "Tamil Nadu":{attention:71,delta:5,velocity:0.21,emotions:{anxiety:14,anger:26,hope:18,pride:30,fear:12},
+    narratives:[{name:"Language politics",val:32,dir:"up"},{name:"Federalism",val:21,dir:"up"},{name:"Education",val:16,dir:"up"},{name:"Economy",val:16,dir:"flat"},{name:"Regional identity",val:15,dir:"up"}],
+    rising:[{t:"NEP three-language row",pct:"+38%"},{t:"State funds dispute",pct:"+21%"}],falling:[{t:"Cyclone aftermath",pct:"-29%"}],
+    articles:[{src:"The Hindu",txt:"Three-language formula debate enters fresh phase"},{src:"Dinamalar",txt:"Student federations pass resolutions against language policy"}],
+    summary:"Tamil Nadu has pivoted decisively to language politics and federalism. The three-language debate is now the defining narrative in both Tamil and English media.",
+    timeline:[64,65,66,68,69,70,70,71],
+    narrativeHistory:[{topic:"Cyclone aftermath",when:"4 months ago",cls:"past"},{topic:"Regional economic growth",when:"3 months ago",cls:"past"},{topic:"Language policy resistance",when:"6 weeks ago",cls:"recent"},{topic:"Federal resource disputes",when:"Now",cls:"current"}]},
+  "West Bengal":{attention:74,delta:4,velocity:0.15,emotions:{anxiety:20,anger:28,hope:14,pride:16,fear:22},
+    narratives:[{name:"Law & order",val:24,dir:"up"},{name:"Religion",val:19,dir:"up"},{name:"Border issues",val:18,dir:"up"},{name:"Corruption",val:22,dir:"flat"},{name:"Governance",val:17,dir:"flat"}],
+    rising:[{t:"Border infiltration debate",pct:"+24%"}],falling:[{t:"Bypoll results",pct:"-22%"}],
+    articles:[{src:"Anandabazar",txt:"BSF and state police escalate coordination near Bongaon"},{src:"Telegraph India",txt:"SSC recruitment case: CBI files fresh charge sheet"}],
+    summary:"Bengal's attention is heavy on law-and-order and border narratives. The school recruitment case continues to generate cycles of outrage.",
+    timeline:[68,69,70,71,72,73,73,74],
+    narrativeHistory:[{topic:"Bypoll politics",when:"5 months ago",cls:"past"},{topic:"Corruption & recruitment",when:"3 months ago",cls:"past"},{topic:"Border & security",when:"6 weeks ago",cls:"recent"},{topic:"Law & order dominance",when:"Now",cls:"current"}]},
+  "Karnataka":{attention:68,delta:2,velocity:0.09,emotions:{anxiety:16,anger:20,hope:22,pride:24,fear:18},
+    narratives:[{name:"Language politics",val:22,dir:"up"},{name:"Economy / IT",val:24,dir:"up"},{name:"Water disputes",val:18,dir:"flat"},{name:"Infrastructure",val:19,dir:"up"},{name:"Regional identity",val:17,dir:"up"}],
+    rising:[{t:"Kannada signage rule",pct:"+22%"}],falling:[{t:"Mining inquiry",pct:"-13%"}],
+    articles:[{src:"Deccan Herald",txt:"Bengaluru civic body steps up Kannada signage enforcement"}],
+    summary:"Karnataka balances economic optimism from the IT corridor with rising regional-identity politics. Both narratives are accelerating simultaneously.",
+    timeline:[64,65,65,66,67,67,68,68],
+    narrativeHistory:[{topic:"Mining controversy",when:"6 months ago",cls:"past"},{topic:"IT sector growth",when:"3 months ago",cls:"past"},{topic:"Water dispute revival",when:"2 months ago",cls:"recent"},{topic:"Language & regional identity",when:"Now",cls:"current"}]},
+  "Kerala":{attention:54,delta:1,velocity:0.04,emotions:{anxiety:14,anger:18,hope:22,pride:26,fear:20},
+    narratives:[{name:"Governance",val:22,dir:"flat"},{name:"Education",val:20,dir:"up"},{name:"Environment",val:18,dir:"up"},{name:"Economy",val:22,dir:"down"},{name:"Religion",val:18,dir:"flat"}],
+    rising:[{t:"Wayanad rehabilitation",pct:"+16%"}],falling:[{t:"Tourism debate",pct:"-9%"}],
+    articles:[{src:"Mathrubhumi",txt:"Wayanad rehabilitation phase two faces land acquisition delays"}],
+    summary:"Kerala maintains a moderate, measured attention profile. The Wayanad recovery operation anchors environmental consciousness; remittance anxiety is the undercurrent.",
+    timeline:[50,51,52,52,53,53,54,54],
+    narrativeHistory:[{topic:"Tourism optimism",when:"5 months ago",cls:"past"},{topic:"Flood & disaster response",when:"3 months ago",cls:"past"},{topic:"Wayanad recovery",when:"2 months ago",cls:"recent"},{topic:"Economy & remittances",when:"Now",cls:"current"}]},
+  "Delhi":{attention:81,delta:9,velocity:0.27,emotions:{anxiety:28,anger:26,hope:12,pride:14,fear:20},
+    narratives:[{name:"Governance",val:26,dir:"up"},{name:"Environment / Air",val:24,dir:"up"},{name:"Law & order",val:18,dir:"up"},{name:"Infrastructure",val:16,dir:"flat"},{name:"Corruption",val:16,dir:"up"}],
+    rising:[{t:"Air quality emergency",pct:"+41%"},{t:"L-G vs CM standoff",pct:"+23%"}],falling:[{t:"Metro fare hike",pct:"-12%"}],
+    articles:[{src:"Indian Express",txt:"Delhi AQI re-enters severe band; GRAP Stage 3 activated"},{src:"Hindustan Times",txt:"L-G writes to CM citing administrative delays"}],
+    summary:"Delhi is climbing sharply — an off-season air quality emergency colliding with a renewed governance standoff. Anxiety is the dominant register for the second consecutive week.",
+    timeline:[68,70,72,74,76,78,79,81],
+    narrativeHistory:[{topic:"Infrastructure & Metro",when:"6 months ago",cls:"past"},{topic:"Governance standoff",when:"4 months ago",cls:"past"},{topic:"Air quality crisis",when:"3 weeks ago",cls:"recent"},{topic:"Environment & governance",when:"Now",cls:"current"}]},
+  "Gujarat":{attention:59,delta:-2,velocity:-0.05,emotions:{anxiety:14,anger:14,hope:24,pride:32,fear:16},
+    narratives:[{name:"Economy",val:30,dir:"up"},{name:"Infrastructure",val:22,dir:"flat"},{name:"Religion",val:14,dir:"flat"},{name:"Governance",val:18,dir:"flat"},{name:"Border issues",val:16,dir:"up"}],
+    rising:[{t:"Semiconductor plant",pct:"+18%"}],falling:[{t:"Statue tourism",pct:"-14%"}],
+    articles:[{src:"Sandesh",txt:"Dholera SIR adds semiconductor anchor tenants"}],
+    summary:"Gujarat's narrative remains economic and infrastructure-led. Pride is the dominant emotional register — uncharacteristic relative to national average.",
+    timeline:[62,61,61,60,60,60,59,59],
+    narrativeHistory:[{topic:"Religious infrastructure",when:"7 months ago",cls:"past"},{topic:"Economic investment push",when:"4 months ago",cls:"past"},{topic:"Manufacturing & exports",when:"2 months ago",cls:"recent"},{topic:"Semiconductor & tech",when:"Now",cls:"current"}]},
+  "Rajasthan":{attention:57,delta:1,velocity:0.03,emotions:{anxiety:18,anger:18,hope:18,pride:20,fear:26},
+    narratives:[{name:"Border issues",val:22,dir:"up"},{name:"Farmer issues",val:20,dir:"flat"},{name:"Environment",val:20,dir:"up"},{name:"Economy",val:18,dir:"flat"},{name:"Religion",val:20,dir:"flat"}],
+    rising:[{t:"Heat wave warnings",pct:"+34%"},{t:"Western border alerts",pct:"+19%"}],falling:[{t:"Tourism off-season",pct:"-22%"}],
+    articles:[{src:"Rajasthan Patrika",txt:"Border districts see fresh security drills"}],
+    summary:"Rajasthan's attention is rising on environment — heat wave coverage spiking sharply. Border security is a steady secondary current in western districts.",
+    timeline:[55,55,56,56,56,57,57,57],
+    narrativeHistory:[{topic:"State election aftermath",when:"8 months ago",cls:"past"},{topic:"Farmer distress",when:"4 months ago",cls:"past"},{topic:"Tourism & economy",when:"2 months ago",cls:"recent"},{topic:"Heat wave & border",when:"Now",cls:"current"}]},
+  "Madhya Pradesh":{attention:52,delta:0,velocity:0.01,emotions:{anxiety:18,anger:16,hope:20,pride:22,fear:24},narratives:[{name:"Farmer issues",val:24,dir:"up"},{name:"Religion",val:20,dir:"flat"},{name:"Governance",val:18,dir:"flat"},{name:"Economy",val:18,dir:"flat"},{name:"Infrastructure",val:20,dir:"up"}],rising:[{t:"Soybean MSP debate",pct:"+14%"}],falling:[{t:"Cabinet expansion",pct:"-18%"}],articles:[{src:"Patrika",txt:"Soybean growers in Malwa demand MSP review"}],summary:"MP stable with agriculture-economy narratives dominating. No sharp movement this cycle.",timeline:[51,52,52,52,52,52,52,52],narrativeHistory:[{topic:"State poll campaigns",when:"8 months ago",cls:"past"},{topic:"Religious sentiment",when:"5 months ago",cls:"past"},{topic:"Agricultural distress",when:"Now",cls:"current"},{topic:"Infrastructure push",when:"Emerging",cls:"recent"}]},
+  "Punjab":{attention:66,delta:3,velocity:0.11,emotions:{anxiety:22,anger:26,hope:12,pride:22,fear:18},narratives:[{name:"Farmer issues",val:28,dir:"up"},{name:"Border issues",val:22,dir:"up"},{name:"Law & order",val:18,dir:"up"},{name:"Economy",val:14,dir:"flat"},{name:"Religion",val:18,dir:"flat"}],rising:[{t:"Stubble policy",pct:"+21%"},{t:"Border drone sightings",pct:"+17%"}],falling:[{t:"Power crisis",pct:"-14%"}],articles:[{src:"Punjabi Tribune",txt:"Stubble management plan unveiled ahead of paddy harvest"}],summary:"Punjab rising on twin tracks: agriculture policy and border security. Anger remains the dominant emotional tone.",timeline:[62,63,63,64,64,65,65,66],narrativeHistory:[{topic:"Farm law aftermath",when:"9 months ago",cls:"past"},{topic:"Power & electricity",when:"4 months ago",cls:"past"},{topic:"Stubble burning policy",when:"6 weeks ago",cls:"recent"},{topic:"Border & drones",when:"Now",cls:"current"}]},
+  "Haryana":{attention:61,delta:2,velocity:0.07,emotions:{anxiety:18,anger:22,hope:18,pride:22,fear:20},narratives:[{name:"Farmer issues",val:22,dir:"up"},{name:"Law & order",val:20,dir:"up"},{name:"Economy",val:18,dir:"flat"},{name:"Caste politics",val:20,dir:"flat"},{name:"Sports",val:20,dir:"up"}],rising:[{t:"NCR pollution spillover",pct:"+19%"}],falling:[{t:"Real estate",pct:"-8%"}],articles:[{src:"Dainik Jagran",txt:"Haryana wrestlers reach national finals"}],summary:"Haryana shows a balanced narrative mix. Sports pride and farmer issues co-anchor public attention in an unusual pairing.",timeline:[58,59,59,60,60,61,61,61],narrativeHistory:[{topic:"Election campaigns",when:"7 months ago",cls:"past"},{topic:"Wrestler protest",when:"5 months ago",cls:"past"},{topic:"Farmer & caste issues",when:"3 months ago",cls:"recent"},{topic:"Pollution & sports",when:"Now",cls:"current"}]},
+  "Telangana":{attention:63,delta:4,velocity:0.13,emotions:{anxiety:16,anger:18,hope:22,pride:22,fear:22},narratives:[{name:"Economy / IT",val:24,dir:"up"},{name:"Governance",val:20,dir:"up"},{name:"Water disputes",val:18,dir:"up"},{name:"Education",val:18,dir:"flat"},{name:"Regional identity",val:20,dir:"up"}],rising:[{t:"Hyderabad cluster expansion",pct:"+16%"}],falling:[{t:"Old city redevelopment",pct:"-11%"}],articles:[{src:"Sakshi",txt:"Telangana adds investment commitments at global summit"}],summary:"Telangana rising on economic and governance tracks simultaneously. Hyderabad's tech cluster is the dominant pride narrative.",timeline:[58,59,60,60,61,62,62,63],narrativeHistory:[{topic:"State formation anniversary",when:"6 months ago",cls:"past"},{topic:"Government formation",when:"4 months ago",cls:"past"},{topic:"Economic investment",when:"2 months ago",cls:"recent"},{topic:"IT & governance",when:"Now",cls:"current"}]},
+  "Andhra Pradesh":{attention:58,delta:2,velocity:0.08,emotions:{anxiety:18,anger:18,hope:20,pride:22,fear:22},narratives:[{name:"Economy",val:22,dir:"up"},{name:"Capital row",val:20,dir:"up"},{name:"Water disputes",val:18,dir:"flat"},{name:"Governance",val:20,dir:"flat"},{name:"Religion",val:20,dir:"flat"}],rising:[{t:"Amaravati restart",pct:"+22%"}],falling:[{t:"Liquor policy",pct:"-9%"}],articles:[{src:"Andhra Jyothy",txt:"Amaravati capital city construction restart formally approved"}],summary:"Andhra rising on Amaravati restart. Pride and hope are the rising emotional tones after years of capital city uncertainty.",timeline:[55,56,56,57,57,58,58,58],narrativeHistory:[{topic:"Capital city dispute",when:"1 year ago",cls:"past"},{topic:"Government transition",when:"5 months ago",cls:"past"},{topic:"Amaravati restart",when:"2 months ago",cls:"recent"},{topic:"Development & pride",when:"Now",cls:"current"}]},
+  "Odisha":{attention:49,delta:-1,velocity:-0.02,emotions:{anxiety:16,anger:14,hope:24,pride:24,fear:22},narratives:[{name:"Economy",val:22,dir:"up"},{name:"Environment",val:22,dir:"up"},{name:"Infrastructure",val:20,dir:"flat"},{name:"Governance",val:18,dir:"flat"},{name:"Tribal issues",val:18,dir:"flat"}],rising:[{t:"Cyclone preparedness",pct:"+18%"}],falling:[{t:"Mining bid round",pct:"-12%"}],articles:[{src:"Dharitri",txt:"Pre-monsoon cyclone drill across coastal districts"}],summary:"Odisha quiet, dominated by environmental preparedness. The cyclone drill season is the primary coverage anchor.",timeline:[50,50,50,50,49,49,49,49],narrativeHistory:[{topic:"State election",when:"8 months ago",cls:"past"},{topic:"Government formation",when:"5 months ago",cls:"past"},{topic:"Infrastructure push",when:"3 months ago",cls:"recent"},{topic:"Environment & cyclone prep",when:"Now",cls:"current"}]},
+  "Jharkhand":{attention:56,delta:3,velocity:0.12,emotions:{anxiety:20,anger:22,hope:14,pride:16,fear:28},narratives:[{name:"Tribal issues",val:24,dir:"up"},{name:"Mining / Economy",val:22,dir:"up"},{name:"Law & order",val:20,dir:"up"},{name:"Governance",val:16,dir:"flat"},{name:"Migration",val:18,dir:"up"}],rising:[{t:"Forest rights dispute",pct:"+24%"}],falling:[{t:"Coal block auction",pct:"-11%"}],articles:[{src:"Prabhat Khabar",txt:"Tribal organizations stage rally on land rights"}],summary:"Jharkhand climbing on tribal land rights and mining intersections. Fear is the dominant emotional register — driven by displacement narratives.",timeline:[52,53,54,54,55,55,56,56],narrativeHistory:[{topic:"State elections",when:"6 months ago",cls:"past"},{topic:"Mining & economy",when:"4 months ago",cls:"past"},{topic:"Tribal land conflict",when:"2 months ago",cls:"recent"},{topic:"Forest rights & displacement",when:"Now",cls:"current"}]},
+  "Chhattisgarh":{attention:51,delta:1,velocity:0.04,emotions:{anxiety:18,anger:18,hope:18,pride:20,fear:26},narratives:[{name:"Law & order",val:24,dir:"up"},{name:"Tribal issues",val:22,dir:"flat"},{name:"Economy",val:18,dir:"flat"},{name:"Governance",val:18,dir:"flat"},{name:"Environment",val:18,dir:"flat"}],rising:[{t:"Bastar operations",pct:"+16%"}],falling:[{t:"Forest auction",pct:"-9%"}],articles:[{src:"Patrika",txt:"Security operations in Bastar lead to record surrender numbers"}],summary:"Chhattisgarh anchored in Bastar security operations. Fear is the dominant emotional register in the southern districts.",timeline:[50,50,50,50,51,51,51,51],narrativeHistory:[{topic:"State elections",when:"8 months ago",cls:"past"},{topic:"Anti-Maoist operations",when:"5 months ago",cls:"past"},{topic:"Tribal & forest policy",when:"Now",cls:"current"},{topic:"Development push",when:"Emerging",cls:"recent"}]},
+  "Assam":{attention:60,delta:3,velocity:0.11,emotions:{anxiety:22,anger:20,hope:18,pride:20,fear:20},narratives:[{name:"Border issues",val:22,dir:"up"},{name:"Religion",val:20,dir:"up"},{name:"Environment / Floods",val:20,dir:"up"},{name:"Economy",val:18,dir:"flat"},{name:"Regional identity",val:20,dir:"up"}],rising:[{t:"NRC update push",pct:"+17%"}],falling:[{t:"Tea industry",pct:"-8%"}],articles:[{src:"Asomiya Pratidin",txt:"State announces fresh push on NRC verification timelines"}],summary:"Assam rising on documentation politics and pre-monsoon flood preparedness. Narratives split between identity and environment.",timeline:[57,58,58,59,59,60,60,60],narrativeHistory:[{topic:"Tea industry & economy",when:"6 months ago",cls:"past"},{topic:"Citizenship documentation",when:"4 months ago",cls:"past"},{topic:"NRC push",when:"2 months ago",cls:"recent"},{topic:"Border & floods",when:"Now",cls:"current"}]},
+  "Himachal Pradesh":{attention:38,delta:0,velocity:0,emotions:{anxiety:16,anger:14,hope:24,pride:28,fear:18},narratives:[{name:"Tourism",val:26,dir:"flat"},{name:"Environment",val:22,dir:"up"},{name:"Infrastructure",val:18,dir:"flat"},{name:"Governance",val:16,dir:"flat"},{name:"Education",val:18,dir:"flat"}],rising:[{t:"Char Dham road work",pct:"+11%"}],falling:[{t:"Hotel rate cap",pct:"-7%"}],articles:[{src:"Amar Ujala",txt:"Tourist arrivals to hill stations rise ahead of summer peak"}],summary:"Himachal in low-attention summer cadence. Tourism economy dominates; environmental concerns are the undercurrent.",timeline:[38,38,38,38,38,38,38,38],narrativeHistory:[{topic:"Disaster reconstruction",when:"8 months ago",cls:"past"},{topic:"Tourism revival",when:"4 months ago",cls:"past"},{topic:"Infrastructure development",when:"Now",cls:"current"},{topic:"Environment monitoring",when:"Emerging",cls:"recent"}]},
+  "Uttarakhand":{attention:41,delta:1,velocity:0.03,emotions:{anxiety:16,anger:14,hope:22,pride:28,fear:20},narratives:[{name:"Religion / Pilgrimage",val:26,dir:"up"},{name:"Environment",val:22,dir:"up"},{name:"Tourism",val:20,dir:"flat"},{name:"Governance",val:16,dir:"flat"},{name:"Infrastructure",val:16,dir:"flat"}],rising:[{t:"Char Dham yatra prep",pct:"+19%"}],falling:[{t:"Power tariff debate",pct:"-9%"}],articles:[{src:"Hindustan Hindi",txt:"Char Dham yatra registrations cross last year's record"}],summary:"Uttarakhand steady on pilgrimage and tourism. Pride is the dominant register — Char Dham season drives collective optimism.",timeline:[39,40,40,40,41,41,41,41],narrativeHistory:[{topic:"Disaster recovery",when:"7 months ago",cls:"past"},{topic:"Infrastructure push",when:"4 months ago",cls:"past"},{topic:"Pilgrimage revival",when:"Now",cls:"current"},{topic:"Environment concerns",when:"Emerging",cls:"recent"}]},
+  "Manipur":{attention:64,delta:5,velocity:0.19,emotions:{anxiety:28,anger:26,hope:10,pride:14,fear:22},narratives:[{name:"Law & order",val:30,dir:"up"},{name:"Border issues",val:22,dir:"up"},{name:"Identity / Ethnic",val:24,dir:"up"},{name:"Governance",val:14,dir:"flat"},{name:"Migration",val:10,dir:"up"}],rising:[{t:"Ethnic tensions resurface",pct:"+27%"},{t:"AFSPA debate",pct:"+14%"}],falling:[{t:"Cabinet shuffle talk",pct:"-13%"}],articles:[{src:"Imphal Free Press",txt:"Fresh tensions reported in valley-hills border villages"}],summary:"Manipur rising sharply on ethnic-identity narratives. The anxiety-anger emotional profile has held for three consecutive months.",timeline:[55,57,59,60,61,62,63,64],narrativeHistory:[{topic:"Post-conflict recovery",when:"8 months ago",cls:"past"},{topic:"Ethnic conflict escalation",when:"5 months ago",cls:"past"},{topic:"AFSPA & governance",when:"2 months ago",cls:"recent"},{topic:"Ethnic tensions · Border",when:"Now",cls:"current"}]},
+  "Jammu and Kashmir":{attention:72,delta:4,velocity:0.17,emotions:{anxiety:22,anger:22,hope:18,pride:18,fear:20},narratives:[{name:"Law & order",val:26,dir:"up"},{name:"Border issues",val:24,dir:"up"},{name:"Tourism",val:18,dir:"up"},{name:"Governance",val:16,dir:"flat"},{name:"Identity",val:16,dir:"flat"}],rising:[{t:"Tourism arrivals high",pct:"+21%"},{t:"LoC incidents",pct:"+15%"}],falling:[{t:"Statehood debate",pct:"-9%"}],articles:[{src:"Greater Kashmir",txt:"Tourist arrivals to Pahalgam, Gulmarg cross seasonal record"},{src:"Daily Excelsior",txt:"LoC remains active; security forces respond to incident"}],summary:"J&K on twin tracks — record tourism arrivals and renewed LoC tensions. An unusual coexistence of hope and anxiety in the same news cycle.",timeline:[65,67,68,69,70,71,72,72],narrativeHistory:[{topic:"Article 370 aftermath",when:"1 year ago",cls:"past"},{topic:"Governance normalisation",when:"6 months ago",cls:"past"},{topic:"Tourism revival",when:"3 months ago",cls:"recent"},{topic:"Tourism & LoC tensions",when:"Now",cls:"current"}]},
+  "Goa":{attention:34,delta:-1,velocity:-0.04,emotions:{anxiety:14,anger:12,hope:22,pride:30,fear:22},narratives:[{name:"Tourism",val:30,dir:"down"},{name:"Environment",val:22,dir:"up"},{name:"Economy",val:18,dir:"flat"},{name:"Governance",val:16,dir:"flat"},{name:"Infrastructure",val:14,dir:"flat"}],rising:[{t:"Coastal zone enforcement",pct:"+12%"}],falling:[{t:"Tourist arrivals",pct:"-21%"}],articles:[{src:"Herald Goa",txt:"CRZ enforcement drive begins in north Goa"}],summary:"Goa in offseason quiet. Coastal regulation enforcement is the only rising signal in an otherwise subdued cycle.",timeline:[36,36,35,35,34,34,34,34],narrativeHistory:[{topic:"Tourism boom",when:"5 months ago",cls:"past"},{topic:"Infrastructure debate",when:"3 months ago",cls:"past"},{topic:"Environment enforcement",when:"Now",cls:"current"},{topic:"Offseason quiet",when:"Now",cls:"recent"}]},
+  "Sikkim":{attention:22,delta:0,velocity:0,emotions:{anxiety:14,anger:10,hope:26,pride:28,fear:22},narratives:[{name:"Environment",val:30,dir:"up"},{name:"Tourism",val:22,dir:"flat"},{name:"Border issues",val:18,dir:"flat"},{name:"Governance",val:16,dir:"flat"},{name:"Economy",val:14,dir:"flat"}],rising:[{t:"Glacier monitoring",pct:"+9%"}],falling:[],articles:[{src:"Sikkim Express",txt:"Glacier survey shows accelerated retreat in north Sikkim"}],summary:"Sikkim draws minimal national attention. Environment-focused narratives dominate a small but consistent signal volume.",timeline:[22,22,22,22,22,22,22,22],narrativeHistory:[{topic:"Flood disaster",when:"8 months ago",cls:"past"},{topic:"Reconstruction",when:"5 months ago",cls:"past"},{topic:"Glacier & environment",when:"Now",cls:"current"},{topic:"Tourism revival",when:"Emerging",cls:"recent"}]},
+  "Nagaland":{attention:28,delta:0,velocity:0.01,emotions:{anxiety:18,anger:14,hope:20,pride:24,fear:24},narratives:[{name:"Border issues",val:22,dir:"flat"},{name:"Identity",val:24,dir:"flat"},{name:"Economy",val:18,dir:"flat"},{name:"Governance",val:18,dir:"flat"},{name:"Environment",val:18,dir:"flat"}],rising:[{t:"Naga framework agreement",pct:"+8%"}],falling:[],articles:[{src:"Morung Express",txt:"Framework agreement implementation discussions resume"}],summary:"Nagaland quietly persistent. Identity and framework narratives hold steady at low volume.",timeline:[28,28,28,28,28,28,28,28],narrativeHistory:[{topic:"Peace process",when:"1 year ago",cls:"past"},{topic:"Stalled framework talks",when:"6 months ago",cls:"past"},{topic:"Identity politics",when:"Now",cls:"current"},{topic:"Framework revival",when:"Emerging",cls:"recent"}]},
+  "Mizoram":{attention:14,delta:0,velocity:0,emotions:{anxiety:10,anger:8,hope:30,pride:32,fear:20},narratives:[{name:"Governance",val:24,dir:"flat"},{name:"Identity",val:20,dir:"flat"},{name:"Economy",val:18,dir:"flat"},{name:"Border issues",val:20,dir:"flat"},{name:"Environment",val:18,dir:"flat"}],rising:[{t:"Cross-border refugee policy",pct:"+6%"}],falling:[],articles:[{src:"Vanglaini",txt:"State updates registration norms for cross-border refugees"}],summary:"Mizoram is the quietest state in India's current attention landscape. Cross-border humanitarian narratives are the only signal.",timeline:[14,14,14,14,14,14,14,14],narrativeHistory:[{topic:"Myanmar refugee crisis",when:"8 months ago",cls:"past"},{topic:"Government formation",when:"5 months ago",cls:"past"},{topic:"Cross-border policy",when:"Now",cls:"current"},{topic:"Economic development",when:"Emerging",cls:"recent"}]},
+  "Tripura":{attention:31,delta:1,velocity:0.04,emotions:{anxiety:18,anger:14,hope:22,pride:22,fear:24},narratives:[{name:"Border issues",val:24,dir:"up"},{name:"Economy",val:20,dir:"flat"},{name:"Governance",val:18,dir:"flat"},{name:"Identity",val:20,dir:"flat"},{name:"Infrastructure",val:18,dir:"flat"}],rising:[{t:"Cross-border trade route",pct:"+11%"}],falling:[{t:"Tribal council meet",pct:"-7%"}],articles:[{src:"Tripura Times",txt:"New cross-border trade corridor with Bangladesh announced"}],summary:"Tripura slowly rising on cross-border economic narratives. The Bangladesh trade corridor is the defining story.",timeline:[30,30,30,31,31,31,31,31],narrativeHistory:[{topic:"Political transition",when:"8 months ago",cls:"past"},{topic:"Infrastructure development",when:"4 months ago",cls:"past"},{topic:"Bangladesh trade",when:"Now",cls:"current"},{topic:"Border & identity",when:"Emerging",cls:"recent"}]},
+  "Meghalaya":{attention:26,delta:0,velocity:0,emotions:{anxiety:14,anger:12,hope:24,pride:28,fear:22},narratives:[{name:"Environment",val:24,dir:"up"},{name:"Tourism",val:22,dir:"flat"},{name:"Identity",val:20,dir:"flat"},{name:"Economy",val:16,dir:"flat"},{name:"Governance",val:18,dir:"flat"}],rising:[{t:"Living root bridge UNESCO push",pct:"+10%"}],falling:[],articles:[{src:"Shillong Times",txt:"State nominates Khasi living root bridges for UNESCO listing"}],summary:"Meghalaya environment and tourism-led. The UNESCO nomination is the flagship pride story.",timeline:[26,26,26,26,26,26,26,26],narrativeHistory:[{topic:"Coal mining ban",when:"9 months ago",cls:"past"},{topic:"Tourism development",when:"5 months ago",cls:"past"},{topic:"Environmental heritage",when:"Now",cls:"current"},{topic:"UNESCO campaign",when:"Emerging",cls:"recent"}]},
+  "Arunachal Pradesh":{attention:36,delta:2,velocity:0.09,emotions:{anxiety:18,anger:16,hope:18,pride:24,fear:24},narratives:[{name:"Border issues",val:30,dir:"up"},{name:"Infrastructure",val:22,dir:"up"},{name:"Identity",val:18,dir:"flat"},{name:"Environment",val:16,dir:"flat"},{name:"Governance",val:14,dir:"flat"}],rising:[{t:"Border infrastructure push",pct:"+22%"}],falling:[{t:"Tourism circuit launch",pct:"-8%"}],articles:[{src:"Arunachal Times",txt:"Border infrastructure projects fast-tracked across Tawang sector"}],summary:"Arunachal rising on border infrastructure and naming-controversy narratives. Both are connected to the same geopolitical undercurrent.",timeline:[33,34,34,35,35,36,36,36],narrativeHistory:[{topic:"Chinese naming controversy",when:"6 months ago",cls:"past"},{topic:"Tourism development",when:"4 months ago",cls:"past"},{topic:"Border infrastructure",when:"2 months ago",cls:"recent"},{topic:"Geopolitical identity",when:"Now",cls:"current"}]},
 };
 
-var DEFAULT_STATE={
+var DEFAULT={
   attention:20,delta:0,velocity:0,
   emotions:{anxiety:15,anger:12,hope:22,pride:25,fear:26},
   narratives:[{name:"Governance",val:25,dir:"flat"},{name:"Economy",val:20,dir:"flat"},{name:"Environment",val:18,dir:"flat"},{name:"Infrastructure",val:18,dir:"flat"},{name:"Tourism",val:19,dir:"flat"}],
   rising:[],falling:[],
   articles:[{src:"PTI",txt:"State governance update reported in routine cycle"}],
-  summary:"Low-attention region. Routine governance and economic narratives without significant movement.",
-  timeline:[20,20,20,20,20,20,20,20]
+  summary:"Low-attention region. Routine governance and economic narratives without significant movement in this cycle.",
+  timeline:[20,20,20,20,20,20,20,20],
+  narrativeHistory:[{topic:"Steady governance",when:"Ongoing",cls:"past"},{topic:"Economic baseline",when:"Now",cls:"current"}]
 };
 
-function getStateData(n){return STATE_DATA[n]||Object.assign({},DEFAULT_STATE);}
+function g(n){return SD[n]||Object.assign({},DEFAULT);}
 
-function attentionColor(s){
-  if(s<20) return '#122030';
-  if(s<35) return '#1a3f6a';
-  if(s<50) return '#26698a';
-  if(s<65) return '#a06a20';
-  if(s<78) return '#c04e18';
-  if(s<88) return '#d83018';
-  return '#f01828';
+function aC(s){
+  if(s<20) return '#0e1e2e';
+  if(s<35) return '#153060';
+  if(s<50) return '#1e5878';
+  if(s<65) return '#8a4e10';
+  if(s<78) return '#a83010';
+  if(s<88) return '#c01808';
+  return '#dc0818';
 }
-function emotionColor(e){
-  var max=0,dom='pride';
-  for(var k in e){if(e[k]>max){max=e[k];dom=k;}}
-  return ({anxiety:'#9c5de5',anger:'#ff4d4d',hope:'#4ade80',pride:'#4cc9f0',fear:'#ffb84d'})[dom]||'#4cc9f0';
+function eC(e){
+  var mx=0,dom='pride';
+  for(var k in e){if(e[k]>mx){mx=e[k];dom=k;}}
+  return ({anxiety:'#8844cc',anger:'#dd2244',hope:'#33cc66',pride:'#33aacc',fear:'#cc8833'})[dom]||'#33aacc';
 }
-function velocityColor(v){
-  if(v>0.2) return '#f01828';
-  if(v>0.1) return '#ff6b3d';
-  if(v>0.02) return '#ffb84d';
-  if(v<-0.05) return '#4cc9f0';
-  return '#1e2c3a';
+function vC(v){
+  if(v>0.2) return '#dc0818';
+  if(v>0.1) return '#e05a28';
+  if(v>0.02) return '#cc8822';
+  if(v<-0.05) return '#2299bb';
+  return '#152030';
 }
 
-var currentLayer='attention',selectedState=null,favorites=new Set();
+var layer='attention',SEL=null,FAVS=new Set();
 
-// ── MAP ──────────────────────────────────────────────────────
-function buildProjection(geo,w,h,pad){
-  pad=pad||30;
+// MAP
+function proj_(w,h,pad){
+  pad=pad||28;
   var minLon=68.1,maxLon=97.4,minLat=6.5,maxLat=35.7;
   function mY(lat){return Math.log(Math.tan(Math.PI/4+lat*Math.PI/360));}
-  var yMin=mY(minLat),yMax=mY(maxLat),lonR=maxLon-minLon,yR=yMax-yMin;
-  var sc=Math.min((w-pad*2)/lonR,(h-pad*2)/yR);
-  var ox=pad+(w-pad*2-lonR*sc)/2,oy=pad+(h-pad*2-yR*sc)/2;
-  return function(lon,lat){return [ox+(lon-minLon)*sc, oy+(yMax-mY(lat))*sc];};
+  var yMn=mY(minLat),yMx=mY(maxLat),lR=maxLon-minLon,yR=yMx-yMn;
+  var sc=Math.min((w-pad*2)/lR,(h-pad*2)/yR);
+  var ox=pad+(w-pad*2-lR*sc)/2,oy=pad+(h-pad*2-yR*sc)/2;
+  return function(lon,lat){return [ox+(lon-minLon)*sc,oy+(yMx-mY(lat))*sc];};
 }
-function geoToPath(geom,proj){
+function geo2path(geom,pj){
   var d='';
-  function ring(coords){var s='';coords.forEach(function(c,i){var p=proj(c[0],c[1]);s+=(i===0?'M':'L')+p[0].toFixed(1)+','+p[1].toFixed(1);});return s+'Z';}
+  function ring(cs){var s='';cs.forEach(function(c,i){var p=pj(c[0],c[1]);s+=(i===0?'M':'L')+p[0].toFixed(1)+','+p[1].toFixed(1);});return s+'Z';}
   if(geom.type==='Polygon') geom.coordinates.forEach(function(r){d+=ring(r);});
   else if(geom.type==='MultiPolygon') geom.coordinates.forEach(function(p){p.forEach(function(r){d+=ring(r);});});
   return d;
 }
-function centroid(geom){
+function ctr(geom){
   var pts=[];
-  function col(c){if(typeof c[0]==='number') pts.push(c); else c.forEach(col);}
+  function col(c){if(typeof c[0]==='number') pts.push(c);else c.forEach(col);}
   col(geom.coordinates);
   if(!pts.length) return [0,0];
   return [pts.reduce(function(s,p){return s+p[0];},0)/pts.length,pts.reduce(function(s,p){return s+p[1];},0)/pts.length];
 }
-function stateName(props){return props.st_nm||props.NAME_1||props.name||props.NAME||'';}
+function sName(props){return props.st_nm||props.NAME_1||props.name||props.NAME||'';}
 
 async function loadMap(){
   try{
     var r=await fetch('https://cdn.jsdelivr.net/gh/udit-001/india-maps-data@master/topojson/india.json');
     var topo=await r.json();
     var geo=topojson.feature(topo,topo.objects.states);
-    await new Promise(function(res){setTimeout(res,200);});
+    await new Promise(function(res){setTimeout(res,250);});
     renderMap(geo);
-    setTimeout(function(){renderMap(geo);},900);
+    setTimeout(function(){renderMap(geo);},950);
   }catch(e){
-    document.querySelector('.map-svg-wrap').innerHTML='<div style="color:#444;padding:40px;text-align:center;font-family:monospace;font-size:12px">Map unavailable</div>';
+    document.querySelector('.map-inner').innerHTML='<div style="color:#2a3a4a;padding:40px;text-align:center;font-family:monospace;font-size:11px;height:100%;display:flex;align-items:center;justify-content:center">Map unavailable</div>';
   }
 }
 
 function renderMap(states){
-  var w=800,h=800,proj=buildProjection(states,w,h,30);
-  var sg=document.getElementById('map-states'),pg=document.getElementById('map-pulses');
-  sg.innerHTML='';pg.innerHTML='';
+  var w=800,h=800,pj=proj_(w,h,28);
+  var sg=document.getElementById('map-states');
+  var pg=document.getElementById('map-pulses');
+  var gg=document.getElementById('map-glow');
+  sg.innerHTML='';pg.innerHTML='';gg.innerHTML='';
+
   states.features.forEach(function(f){
     if(!f.geometry) return;
-    var name=stateName(f.properties),data=getStateData(name);
-    var path=document.createElementNS('http://www.w3.org/2000/svg','path');
-    path.setAttribute('d',geoToPath(f.geometry,proj));
-    path.setAttribute('class','state');
-    path.setAttribute('data-name',name);
-    path.setAttribute('stroke','rgba(255,255,255,0.09)');
-    path.setAttribute('stroke-width','0.5');
-    sg.appendChild(path);
-    var cLL=centroid(f.geometry),cp=proj(cLL[0],cLL[1]);
-    if(data.attention>=70){
-      var ring=document.createElementNS('http://www.w3.org/2000/svg','circle');
-      ring.setAttribute('cx',cp[0]);ring.setAttribute('cy',cp[1]);
-      ring.setAttribute('class','pulse-ring');
-      ring.setAttribute('stroke',attentionColor(data.attention));
-      ring.setAttribute('stroke-width','1.5');
-      ring.style.animationDelay=(Math.random()*2.2)+'s';
-      pg.appendChild(ring);
+    var nm=sName(f.properties),d=g(nm);
+    var pathEl=document.createElementNS('http://www.w3.org/2000/svg','path');
+    pathEl.setAttribute('d',geo2path(f.geometry,pj));
+    pathEl.setAttribute('class','state');
+    pathEl.setAttribute('data-name',nm);
+    pathEl.setAttribute('stroke','rgba(255,255,255,0.07)');
+    pathEl.setAttribute('stroke-width','0.5');
+    sg.appendChild(pathEl);
+
+    var ct=ctr(f.geometry),cp=pj(ct[0],ct[1]);
+
+    // Atmospheric glow for high-attention states
+    if(d.attention>=65){
+      var glowEl=document.createElementNS('http://www.w3.org/2000/svg','ellipse');
+      var glowR=Math.min(60,20+d.attention*0.5);
+      glowEl.setAttribute('cx',cp[0]);glowEl.setAttribute('cy',cp[1]);
+      glowEl.setAttribute('rx',glowR);glowEl.setAttribute('ry',glowR*0.7);
+      glowEl.setAttribute('fill',aC(d.attention));
+      glowEl.setAttribute('opacity','0.08');
+      glowEl.setAttribute('filter','url(#stateGlow)');
+      glowEl.style.animation='glowPulse '+(2.5+Math.random())+'s ease-in-out '+(Math.random()*2)+'s infinite';
+      gg.appendChild(glowEl);
+    }
+
+    // Dual pulse rings for very hot states
+    if(d.attention>=72){
+      [0,1].forEach(function(i){
+        var ring=document.createElementNS('http://www.w3.org/2000/svg','circle');
+        ring.setAttribute('cx',cp[0]);ring.setAttribute('cy',cp[1]);
+        ring.setAttribute('class','pulse-ring p'+(i+1));
+        ring.setAttribute('stroke',aC(d.attention));
+        ring.setAttribute('stroke-width','1');
+        ring.style.animationDelay=(Math.random()*2.5)+'s';
+        pg.appendChild(ring);
+      });
     }
   });
   applyLayer();
@@ -885,12 +1028,12 @@ function renderMap(states){
 
 function applyLayer(){
   document.querySelectorAll('#map-states .state').forEach(function(p){
-    var name=p.getAttribute('data-name'),d=getStateData(name),fill;
-    if(currentLayer==='attention') fill=attentionColor(d.attention);
-    else if(currentLayer==='emotion') fill=emotionColor(d.emotions);
-    else fill=velocityColor(d.velocity);
+    var nm=p.getAttribute('data-name'),d=g(nm),fill;
+    if(layer==='attention') fill=aC(d.attention);
+    else if(layer==='emotion') fill=eC(d.emotions);
+    else fill=vC(d.velocity);
     p.setAttribute('fill',fill);
-    p.setAttribute('fill-opacity',currentLayer==='attention'?(0.45+d.attention/220):0.78);
+    p.setAttribute('fill-opacity',layer==='attention'?(0.5+d.attention/240):0.8);
   });
 }
 
@@ -898,155 +1041,193 @@ function attachInteractions(){
   var tip=document.getElementById('tooltip');
   document.querySelectorAll('#map-states .state').forEach(function(p){
     p.addEventListener('mousemove',function(e){
-      var name=p.getAttribute('data-name'),d=getStateData(name);
+      var nm=p.getAttribute('data-name'),d=g(nm);
       var top=d.narratives&&d.narratives[0]?d.narratives[0].name:'—';
-      tip.innerHTML='<div class="tt-name">'+name+'</div>'+
-        '<div class="tt-row"><span>Top narrative</span><strong>'+top+'</strong></div>'+
-        '<div class="tt-row"><span>Attention</span><strong>'+d.attention+'</strong></div>'+
-        '<div class="tt-row"><span>24h</span><strong style="color:'+(d.delta>=0?'#ff8a5b':'#4cc9f0')+'">'+(d.delta>=0?'+':'')+d.delta+'</strong></div>';
-      var rect=document.querySelector('.map-svg-wrap').getBoundingClientRect();
-      tip.style.left=Math.min(e.clientX-rect.left+14,rect.width-175)+'px';
-      tip.style.top=Math.min(e.clientY-rect.top+14,rect.height-120)+'px';
+      var hist=d.narrativeHistory;
+      var latest=hist&&hist.length?hist[hist.length-1].topic:'—';
+      tip.innerHTML=
+        '<div class="tt-n">'+nm+'</div>'+
+        '<div class="tt-r"><span>Dominant narrative</span><strong>'+top+'</strong></div>'+
+        '<div class="tt-r"><span>Attention</span><strong>'+d.attention+'</strong></div>'+
+        (d.delta!==0?'<div class="tt-r"><span>24h shift</span><strong style="color:'+(d.delta>0?'#e05a28':'#3bb8d8')+'">'+(d.delta>0?'+':'')+d.delta+'</strong></div>':'')+
+        '<div class="tt-nar"><strong>Current narrative</strong>'+latest+'</div>';
+      var rect=document.querySelector('.map-inner').getBoundingClientRect();
+      tip.style.left=Math.min(e.clientX-rect.left+14,rect.width-180)+'px';
+      tip.style.top=Math.min(e.clientY-rect.top+14,rect.height-140)+'px';
       tip.style.opacity=1;
     });
     p.addEventListener('mouseleave',function(){tip.style.opacity=0;});
-    p.addEventListener('click',function(){selectState(p.getAttribute('data-name'));});
+    p.addEventListener('click',function(){select_(p.getAttribute('data-name'));});
   });
 }
 
-// ── STATE PANEL ──────────────────────────────────────────────
-function selectState(name){
-  selectedState=name;
-  document.querySelectorAll('#map-states .state').forEach(function(p){p.classList.toggle('selected',p.getAttribute('data-name')===name);});
-  renderStatePanel(name);
-  fetchStateDetail(name).then(function(d){if(selectedState===name) renderStatePanel(name);});
+// STATE PANEL
+function select_(nm){
+  SEL=nm;
+  document.querySelectorAll('#map-states .state').forEach(function(p){p.classList.toggle('selected',p.getAttribute('data-name')===nm);});
+  renderPanel(nm);
+  fetchDetail(nm).then(function(d){if(SEL===nm) renderPanel(nm);});
 }
 
-function renderStatePanel(name){
-  var d=getStateData(name),panel=document.getElementById('state-detail');
-  var isFav=favorites.has(name),dSign=d.delta>=0?'+':'',dCls=d.delta>=0?'up':'dn';
-  var pal={anxiety:'#9c5de5',anger:'#ff4d4d',hope:'#4ade80',pride:'#4cc9f0',fear:'#ffb84d'};
-  var eList=Object.entries(d.emotions),tot=eList.reduce(function(s,kv){return s+kv[1];},0);
-  var cumA=-Math.PI/2,cx=40,cy=40,R=35,ri=22;
-  var arcs=eList.map(function(kv){
+function renderPanel(nm){
+  var d=g(nm),panel=document.getElementById('state-detail');
+  var isFav=FAVS.has(nm),dS=d.delta>=0?'+':'',dC=d.delta>=0?'up':'dn';
+  var pal={anxiety:'#8844cc',anger:'#dd2244',hope:'#33cc66',pride:'#33aacc',fear:'#cc8833'};
+  var eL=Object.entries(d.emotions),tot=eL.reduce(function(s,kv){return s+kv[1];},0);
+  var cumA=-Math.PI/2,cx=38,cy=38,R=33,ri=20;
+  var arcs=eL.map(function(kv){
     var k=kv[0],v=kv[1],fr=v/tot,a1=cumA,a2=cumA+fr*Math.PI*2;
-    cumA=a2;
-    var lg=(a2-a1)>Math.PI?1:0;
+    cumA=a2;var lg=(a2-a1)>Math.PI?1:0;
     var x1=cx+Math.cos(a1)*R,y1=cy+Math.sin(a1)*R,x2=cx+Math.cos(a2)*R,y2=cy+Math.sin(a2)*R;
     var x3=cx+Math.cos(a2)*ri,y3=cy+Math.sin(a2)*ri,x4=cx+Math.cos(a1)*ri,y4=cy+Math.sin(a1)*ri;
-    return '<path d="M'+x1.toFixed(1)+','+y1.toFixed(1)+' A'+R+','+R+' 0 '+lg+' 1 '+x2.toFixed(1)+','+y2.toFixed(1)+' L'+x3.toFixed(1)+','+y3.toFixed(1)+' A'+ri+','+ri+' 0 '+lg+' 0 '+x4.toFixed(1)+','+y4.toFixed(1)+' Z" fill="'+pal[k]+'" opacity="0.88"/>';
+    return '<path d="M'+x1.toFixed(1)+','+y1.toFixed(1)+' A'+R+','+R+' 0 '+lg+' 1 '+x2.toFixed(1)+','+y2.toFixed(1)+' L'+x3.toFixed(1)+','+y3.toFixed(1)+' A'+ri+','+ri+' 0 '+lg+' 0 '+x4.toFixed(1)+','+y4.toFixed(1)+' Z" fill="'+pal[k]+'" opacity="0.9"/>';
   }).join('');
+
   var tl=d.timeline,tmn=Math.min.apply(null,tl),tmx=Math.max.apply(null,tl),tr=Math.max(1,tmx-tmn);
-  var tw=280,th=68,tp=5;
+  var tw=260,th=62,tp=5;
   var pts=tl.map(function(v,i){return [tp+(i/(tl.length-1))*(tw-tp*2),tp+(1-(v-tmn)/tr)*(th-tp*2)];});
   var pD=pts.map(function(p,i){return (i===0?'M':'L')+p[0].toFixed(1)+','+p[1].toFixed(1);}).join('');
   var aD=pD+' L'+pts[pts.length-1][0]+','+(th-tp)+' L'+pts[0][0]+','+(th-tp)+' Z';
-  var ac=attentionColor(d.attention);
+  var ac=aC(d.attention);
+
+  var hist=d.narrativeHistory||[];
 
   panel.innerHTML=
-    '<div class="state-header">'+
-      '<div><div class="s-ek">State narrative panel</div><div class="s-name">'+name+'</div></div>'+
-      '<button class="fav-btn '+(isFav?'active':'')+'" onclick="toggleFav(\''+name+'\')">'+
+    '<div class="sp-head">'+
+      '<div><div class="sp-ek">Narrative panel</div><div class="sp-name">'+nm+'</div></div>'+
+      '<button class="fav-btn '+(isFav?'on':'')+'" onclick="toggleFav(\''+nm+'\')" title="Track">'+
         '<svg viewBox="0 0 24 24" fill="'+(isFav?'currentColor':'none')+'" stroke="currentColor" stroke-width="1.5"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>'+
       '</button>'+
     '</div>'+
-    '<div class="score-row">'+
-      '<div><div class="score-label">Attention index</div><div class="score-val">'+d.attention+'</div></div>'+
-      '<div class="score-delta '+dCls+'">'+dSign+d.delta+' / 24h</div>'+
+
+    // Narrative history timeline — signature feature
+    (hist.length?
+      '<div class="nar-timeline">'+
+        '<div class="nt-label">Narrative evolution</div>'+
+        '<div class="nt-flow">'+
+          hist.map(function(h){
+            return '<div class="nt-step '+h.cls+'">'+
+              '<div class="nt-dot"></div>'+
+              '<div class="nt-content">'+
+                '<div class="nt-topic">'+h.topic+'</div>'+
+                '<div class="nt-when">'+h.when+'</div>'+
+              '</div>'+
+            '</div>';
+          }).join('')+
+        '</div>'+
+      '</div>':'')+
+
+    '<div class="insight">'+d.summary+'</div>'+
+
+    '<div class="score-strip">'+
+      '<div class="ss-item"><div class="ss-label">Attention</div><div class="ss-val">'+d.attention+'</div></div>'+
+      '<div class="ss-divider"></div>'+
+      '<div class="ss-item"><div class="ss-label">24h shift</div><div class="ss-delta '+dC+'">'+dS+d.delta+'</div></div>'+
+      '<div class="ss-divider"></div>'+
+      '<div class="ss-item"><div class="ss-label">Top narrative</div><div class="ss-nar">'+(d.narratives[0]?d.narratives[0].name:'—')+'</div></div>'+
     '</div>'+
-    '<div class="insight-box">'+d.summary+'</div>'+
-    '<div class="sub-title">Dominant narratives</div>'+
-    '<div class="narratives">'+
-      d.narratives.map(function(n){
-        return '<div class="narrative">'+
-          '<div class="nar-label">'+n.name+(n.dir==='up'?' <span style="color:#ff8a5b;font-size:10px">↑</span>':n.dir==='down'?' <span style="color:#4cc9f0;font-size:10px">↓</span>':'')+'</div>'+
-          '<div class="nar-val">'+n.val+'%</div>'+
-          '<div class="nar-track"><div class="nar-fill" style="width:'+Math.min(100,n.val*2.6)+'%;background:'+(n.dir==='up'?'#ff6b3d':n.dir==='down'?'#4cc9f0':'#445')+'"></div></div>'+
-        '</div>';
-      }).join('')+
-    '</div>'+
-    '<div class="sub-title">Narrative movement</div>'+
-    '<div class="rf-grid">'+
-      '<div class="rf-block up"><div class="rh">▲ Rising</div>'+
-        (d.rising.length?d.rising.map(function(r){return '<div class="ri"><strong>'+r.t+'</strong><span>'+r.pct+'</span></div>';}).join(''):'<div class="ri" style="color:var(--ink-faint)">No rising signals</div>')+
-      '</div>'+
-      '<div class="rf-block dn"><div class="rh">▼ Falling</div>'+
-        (d.falling.length?d.falling.map(function(r){return '<div class="ri"><strong>'+r.t+'</strong><span>'+r.pct+'</span></div>';}).join(''):'<div class="ri" style="color:var(--ink-faint)">No falling signals</div>')+
-      '</div>'+
-    '</div>'+
-    '<div class="sub-title">Emotional tone</div>'+
-    '<div class="emotion-row">'+
-      '<svg class="emotion-donut" viewBox="0 0 80 80">'+arcs+'</svg>'+
-      '<div class="emotion-legend">'+
-        eList.sort(function(a,b){return b[1]-a[1];}).map(function(kv){
-          return '<div class="ei"><span class="esw" style="background:'+pal[kv[0]]+'"></span><span class="en">'+kv[0].charAt(0).toUpperCase()+kv[0].slice(1)+'</span><span class="ep">'+Math.round(kv[1]*100/tot)+'%</span></div>';
+
+    '<div class="sp-section">'+
+      '<div class="sp-sec-title">Narrative breakdown</div>'+
+      '<div class="nar-list">'+
+        d.narratives.map(function(n){
+          return '<div class="nar-item2">'+
+            '<div class="ni-label">'+n.name+(n.dir==='up'?' <span style="color:#e05a28;font-size:9px">↑</span>':n.dir==='down'?' <span style="color:#3bb8d8;font-size:9px">↓</span>':'')+'</div>'+
+            '<div class="ni-val">'+n.val+'%</div>'+
+            '<div class="ni-track"><div class="ni-fill" style="width:'+Math.min(100,n.val*2.5)+'%;background:'+(n.dir==='up'?'#e05a28':n.dir==='down'?'#3bb8d8':'#334455')+'"></div></div>'+
+          '</div>';
         }).join('')+
       '</div>'+
     '</div>'+
-    '<div class="sub-title">Attention · 8 days</div>'+
-    '<div class="tl-chart">'+
-      '<svg viewBox="0 0 '+tw+' '+th+'" style="width:100%;height:100%">'+
-        '<defs><linearGradient id="tlg'+name.replace(/\s+/g,'')+'" x1="0" x2="0" y1="0" y2="1">'+
-          '<stop offset="0%" stop-color="'+ac+'" stop-opacity="0.3"/>'+
-          '<stop offset="100%" stop-color="'+ac+'" stop-opacity="0"/>'+
-        '</linearGradient></defs>'+
-        '<path d="'+aD+'" fill="url(#tlg'+name.replace(/\s+/g,'')+')"/>'+
-        '<path d="'+pD+'" fill="none" stroke="'+ac+'" stroke-width="1.5"/>'+
-        pts.map(function(p,i){return '<circle cx="'+p[0]+'" cy="'+p[1]+'" r="'+(i===pts.length-1?2.5:1.5)+'" fill="'+ac+'"/>';}).join('')+
-      '</svg>'+
+
+    '<div class="sp-section">'+
+      '<div class="sp-sec-title">Movement</div>'+
+      '<div class="mv-grid">'+
+        '<div class="mv-block up"><div class="mv-h">Rising</div>'+
+          (d.rising.length?d.rising.map(function(r){return '<div class="mv-it"><strong>'+r.t+'</strong><span>'+r.pct+'</span></div>';}).join(''):'<div class="mv-it" style="color:var(--faint)">Stable</div>')+
+        '</div>'+
+        '<div class="mv-block dn"><div class="mv-h">Falling</div>'+
+          (d.falling.length?d.falling.map(function(r){return '<div class="mv-it"><strong>'+r.t+'</strong><span>'+r.pct+'</span></div>';}).join(''):'<div class="mv-it" style="color:var(--faint)">Stable</div>')+
+        '</div>'+
+      '</div>'+
     '</div>'+
-    '<div class="sub-title">Recent signals <span style="color:var(--ink-faint);font-weight:400">'+d.articles.length+'</span></div>'+
-    '<div class="articles">'+
-      d.articles.map(function(a){return '<div class="article"><div class="a-src">'+a.src+'</div><div class="a-txt">'+a.txt+'</div></div>';}).join('')+
+
+    '<div class="sp-section">'+
+      '<div class="sp-sec-title">Emotional register</div>'+
+      '<div class="em-row">'+
+        '<svg class="em-donut" viewBox="0 0 76 76">'+arcs+'</svg>'+
+        '<div class="em-leg">'+
+          eL.sort(function(a,b){return b[1]-a[1];}).map(function(kv){
+            return '<div class="em-item"><span class="em-sw" style="background:'+pal[kv[0]]+'"></span><span class="em-n">'+kv[0].charAt(0).toUpperCase()+kv[0].slice(1)+'</span><span class="em-p">'+Math.round(kv[1]*100/tot)+'%</span></div>';
+          }).join('')+
+        '</div>'+
+      '</div>'+
+    '</div>'+
+
+    '<div class="sp-section">'+
+      '<div class="sp-sec-title">Attention — 8 days</div>'+
+      '<div class="tl-wrap">'+
+        '<svg viewBox="0 0 '+tw+' '+th+'" style="width:100%;height:100%">'+
+          '<defs><linearGradient id="tlg'+nm.replace(/[^a-z]/gi,'')+'" x1="0" x2="0" y1="0" y2="1">'+
+            '<stop offset="0%" stop-color="'+ac+'" stop-opacity="0.25"/>'+
+            '<stop offset="100%" stop-color="'+ac+'" stop-opacity="0"/>'+
+          '</linearGradient></defs>'+
+          '<path d="'+aD+'" fill="url(#tlg'+nm.replace(/[^a-z]/gi,'')+')"/>'+
+          '<path d="'+pD+'" fill="none" stroke="'+ac+'" stroke-width="1.2"/>'+
+          pts.map(function(p,i){return '<circle cx="'+p[0]+'" cy="'+p[1]+'" r="'+(i===pts.length-1?2.2:1.2)+'" fill="'+ac+'"/>';}).join('')+
+        '</svg>'+
+      '</div>'+
+    '</div>'+
+
+    '<div class="sp-section">'+
+      '<div class="sp-sec-title">Signals <span style="color:var(--faint)">'+d.articles.length+'</span></div>'+
+      '<div class="art-list">'+
+        d.articles.map(function(a){return '<div class="art-item"><div class="art-src">'+a.src+'</div><div class="art-txt">'+a.txt+'</div></div>';}).join('')+
+      '</div>'+
     '</div>';
 }
 
-// ── FAVORITES ────────────────────────────────────────────────
-function toggleFav(name){
-  if(favorites.has(name)) favorites.delete(name); else favorites.add(name);
-  renderStatePanel(selectedState);
-  renderFavorites();
+function toggleFav(nm){
+  if(FAVS.has(nm)) FAVS.delete(nm);else FAVS.add(nm);
+  renderPanel(SEL);renderFavs();
 }
-function renderFavorites(){
+function renderFavs(){
   var row=document.getElementById('fav-row');
-  if(!favorites.size){row.innerHTML='<div class="fav-empty">No states tracked. Click the bookmark icon on any state panel.</div>';return;}
-  row.innerHTML=Array.from(favorites).map(function(name){
-    var d=getStateData(name),dS=d.delta>=0?'+':'',dC=d.delta>=0?'#ff8a5b':'#4cc9f0';
+  if(!FAVS.size){row.innerHTML='<div class="favs-empty">No states tracked. Bookmark any state panel to follow its narrative evolution.</div>';return;}
+  row.innerHTML=Array.from(FAVS).map(function(nm){
+    var d=g(nm),dS=d.delta>=0?'+':'',dC=d.delta>=0?'#e05a28':'#3bb8d8';
     var top=d.narratives&&d.narratives[0]?d.narratives[0].name:'—';
-    return '<div class="fav-card" onclick="selectState(\''+name+'\')">'+
-      '<div class="fav-head"><span class="fav-name">'+name+'</span><span class="fav-score">'+d.attention+'</span></div>'+
-      '<div class="fav-row2"><span>Top narrative</span><span class="v">'+top+'</span></div>'+
-      '<div class="fav-row2"><span>24h</span><span class="v" style="color:'+dC+'">'+dS+d.delta+'</span></div>'+
+    return '<div class="fav-card" onclick="select_(\''+nm+'\')">'+
+      '<div class="fc-head"><span class="fc-name">'+nm+'</span><span class="fc-sc">'+d.attention+'</span></div>'+
+      '<div class="fc-row"><span>Narrative</span><span class="v">'+top+'</span></div>'+
+      '<div class="fc-row"><span>24h</span><span class="v" style="color:'+dC+'">'+dS+d.delta+'</span></div>'+
     '</div>';
   }).join('');
 }
 
-// layer switcher
-document.querySelectorAll('.layer-tab').forEach(function(c){
+document.querySelectorAll('.ltab').forEach(function(c){
   c.addEventListener('click',function(){
-    document.querySelectorAll('.layer-tab').forEach(function(x){x.classList.remove('active');});
-    c.classList.add('active');currentLayer=c.dataset.layer;applyLayer();
+    document.querySelectorAll('.ltab').forEach(function(x){x.classList.remove('active');});
+    c.classList.add('active');layer=c.dataset.layer;applyLayer();
   });
 });
 
-// clock
 function updateClock(){
   var now=new Date(),ist=new Date(now.getTime()+now.getTimezoneOffset()*60000+19800000);
   document.getElementById('clock').textContent=String(ist.getHours()).padStart(2,'0')+':'+String(ist.getMinutes()).padStart(2,'0')+':'+String(ist.getSeconds()).padStart(2,'0')+' IST';
 }
 setInterval(updateClock,1000);updateClock();
 
-// ── INIT ─────────────────────────────────────────────────────
+// INIT
 renderStrip('3m');
-renderNarrativeMomentum();
+renderMomentum();
 loadMap();
-setTimeout(function(){startPolling();},1000);
+setTimeout(function(){startPolling();},800);
 setTimeout(function(){
-  var top=Object.entries(STATE_DATA).sort(function(a,b){return (b[1].attention||0)-(a[1].attention||0);})[0];
-  var name=top?top[0]:'Delhi';
-  if(document.querySelector('#map-states .state[data-name="'+name+'"]')) selectState(name);
-},2200);
-setTimeout(renderFavorites,2200);
+  var top=Object.entries(SD).sort(function(a,b){return (b[1].attention||0)-(a[1].attention||0);})[0];
+  if(top&&document.querySelector('#map-states .state[data-name="'+top[0]+'"]')) select_(top[0]);
+},2400);
+setTimeout(renderFavs,2400);
 </script>
 </body>
 </html>
