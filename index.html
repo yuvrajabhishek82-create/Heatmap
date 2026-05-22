@@ -78,7 +78,7 @@ body::before{
 /* HERO */
 .hero{
   position:relative;z-index:1;
-  padding:130px 36px 0;
+  padding:72px 36px 0;
   max-width:1480px;margin:0 auto;
 }
 .hero-eyebrow{
@@ -89,15 +89,15 @@ body::before{
 .hero-eyebrow::before{content:'';width:18px;height:1px;background:var(--accent);opacity:0.7}
 .hero-title{
   font-family:var(--serif);font-weight:300;font-style:italic;
-  font-size:clamp(36px,4.8vw,78px);line-height:1.0;
+  font-size:clamp(28px,3.2vw,52px);line-height:1.05;
   letter-spacing:-0.03em;max-width:820px;color:var(--ink);
 }
 .hero-title span{font-style:normal;color:rgba(221,230,245,0.55)}
 
 /* SIGNATURE INSIGHT */
 .signature-insight{
-  margin-top:40px;
-  padding:22px 28px;
+  margin-top:0;
+  padding:14px 20px;
   border:1px solid var(--border2);border-radius:14px;
   background:linear-gradient(135deg, rgba(224,90,40,0.06) 0%, rgba(59,184,216,0.03) 100%);
   backdrop-filter:blur(8px);
@@ -113,7 +113,7 @@ body::before{
   color:var(--accent);margin-bottom:10px;
 }
 .si-text{
-  font-family:var(--serif);font-size:clamp(16px,1.8vw,22px);
+  font-family:var(--serif);font-size:clamp(14px,1.4vw,18px);
   font-weight:300;color:var(--ink);line-height:1.5;letter-spacing:-0.01em;
 }
 .si-text em{font-style:italic;color:var(--accent)}
@@ -128,19 +128,7 @@ body::before{
 }
 
 /* NARRATIVE STRIP */
-.narrative-strip{
-  margin-top:32px;padding-bottom:40px;
-  max-width:1480px;margin-left:auto;margin-right:auto;padding-left:36px;padding-right:36px;
-}
-.strip-inner{
-  display:flex;align-items:stretch;gap:1px;
-  background:var(--border);border-radius:12px;overflow:hidden;
-  border:1px solid var(--border);
-}
-.strip-tab-header{
-  display:flex;align-items:center;gap:2px;
-  padding:10px 14px;background:var(--bg1);border-bottom:1px solid var(--border);
-}
+
 .strip-tab{
   font-family:var(--mono);font-size:8.5px;letter-spacing:0.1em;text-transform:uppercase;
   color:var(--faint);padding:4px 9px;border-radius:3px;cursor:pointer;
@@ -170,10 +158,11 @@ body::before{
 .main{
   position:relative;z-index:1;
   max-width:1480px;margin:0 auto;
-  padding:0 36px 36px;
+  padding:0 36px 28px;
   display:grid;
   grid-template-columns:1fr 360px;
-  gap:18px;
+  gap:14px;
+  min-width:0;
 }
 
 /* MAP */
@@ -191,7 +180,7 @@ body::before{
 .map-top{
   position:relative;z-index:1;
   display:flex;align-items:center;justify-content:space-between;
-  padding:16px 20px 0;
+  padding:12px 18px 0;
 }
 .map-title-block .mt{font-family:var(--serif);font-size:17px;font-weight:400;letter-spacing:-0.01em}
 .map-title-block .ms{font-family:var(--mono);font-size:9px;color:var(--faint);letter-spacing:0.06em;margin-top:2px}
@@ -268,6 +257,7 @@ body::before{
   background:var(--surf);border:1px solid var(--border);
   border-radius:16px;backdrop-filter:blur(16px);
   padding:20px;overflow-y:auto;max-height:780px;
+  min-width:0;overflow-x:hidden;
 }
 .state-panel::-webkit-scrollbar{width:3px}
 .state-panel::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px}
@@ -511,8 +501,59 @@ body::before{
   </div>
 </div>
 
+<!-- LIVE STATS STRIP -->
+<div id="stats-strip" style="
+  position:relative;z-index:2;
+  background:rgba(9,13,21,0.9);
+  border-bottom:1px solid rgba(160,190,230,0.08);
+  padding:0 36px;
+  display:flex;align-items:stretch;
+">
+  <div class="stat-cell" id="sc-signals">
+    <div class="sc-label">Signals tracked</div>
+    <div class="sc-val" id="sc-signals-val">—</div>
+    <div class="sc-sub">Live ingestion</div>
+  </div>
+  <div class="stat-div"></div>
+  <div class="stat-cell" id="sc-hottest" style="cursor:pointer" onclick="selectHottest()">
+    <div class="sc-label">Highest attention</div>
+    <div class="sc-val" id="sc-hottest-val">—</div>
+    <div class="sc-sub" id="sc-hottest-sub">Click to explore</div>
+  </div>
+  <div class="stat-div"></div>
+  <div class="stat-cell">
+    <div class="sc-label">Peak anger state</div>
+    <div class="sc-val" id="sc-anger-val">—</div>
+    <div class="sc-sub" id="sc-anger-sub">Outrage & protest signals</div>
+  </div>
+  <div class="stat-div"></div>
+  <div class="stat-cell">
+    <div class="sc-label">Top rising narrative</div>
+    <div class="sc-val" id="sc-narrative-val">—</div>
+    <div class="sc-sub" id="sc-narrative-sub">National signal surge</div>
+  </div>
+  <div class="stat-div"></div>
+  <div class="stat-cell">
+    <div class="sc-label">Fastest cooling</div>
+    <div class="sc-val" id="sc-cooling-val">—</div>
+    <div class="sc-sub" id="sc-cooling-sub">Signal decay</div>
+  </div>
+</div>
+
+<style>
+.stat-cell{
+  flex:1;padding:10px 16px;display:flex;flex-direction:column;justify-content:center;gap:2px;
+  transition:background 0.15s;
+}
+.stat-cell:hover{background:rgba(255,255,255,0.02)}
+.stat-div{width:1px;background:rgba(160,190,230,0.07);flex-shrink:0;margin:8px 0}
+.sc-label{font-family:var(--mono);font-size:8px;letter-spacing:0.2em;text-transform:uppercase;color:var(--faint)}
+.sc-val{font-family:var(--serif);font-size:18px;font-weight:400;letter-spacing:-0.01em;color:var(--ink);margin-top:1px}
+.sc-sub{font-family:var(--mono);font-size:9px;color:var(--faint);margin-top:1px}
+</style>
+
 <!-- HERO -->
-<section class="hero">
+<section class="hero" style="padding-bottom:0">
   <div class="hero-eyebrow">Political narrative intelligence &middot; India</div>
   <h1 class="hero-title">
     Observing India's<br/>
@@ -520,41 +561,33 @@ body::before{
     attention — live.
   </h1>
 
-  <!-- SIGNATURE INSIGHT -->
-  <div class="signature-insight">
-    <div class="si-label">Current national narrative shift</div>
-    <div class="si-text" id="sig-insight">India's attention is moving from <em>inflation and cost-of-living anxiety</em> toward <em>governance accountability and border security</em> — a shift accelerating across the northern belt.</div>
-    <div class="si-sub">
-      <span class="si-tag" id="sig-tag1">↓ Inflation · fading</span>
-      <span class="si-tag" id="sig-tag2">↑ Governance · rising</span>
-      <span class="si-tag" id="sig-tag3">↑ Border security · surging</span>
+  <!-- SIGNATURE INSIGHT + NARRATIVE STRIP side by side -->
+  <div style="display:flex;gap:18px;align-items:stretch;margin-top:16px;margin-bottom:0;max-width:1480px;margin-left:auto;margin-right:auto;padding:0 36px;">
+    <div class="signature-insight" style="margin-top:0;flex:1;min-width:0">
+      <div class="si-label">Current national narrative shift</div>
+      <div class="si-text" id="sig-insight">India's attention is moving from <em>inflation and cost-of-living anxiety</em> toward <em>governance accountability and border security</em> — a shift accelerating across the northern belt.</div>
+      <div class="si-sub">
+        <span class="si-tag" id="sig-tag1">↓ Inflation · fading</span>
+        <span class="si-tag" id="sig-tag2">↑ Governance · rising</span>
+        <span class="si-tag" id="sig-tag3">↑ Border security · surging</span>
+      </div>
     </div>
-  </div>
-</section>
-
-<!-- COMPACT NARRATIVE STRIP -->
-<div class="narrative-strip">
-  <div class="strip-inner">
-    <div class="strip-col" style="max-width:200px;border-right:1px solid var(--border)">
-      <div class="strip-col-head fade" style="display:flex;align-items:center;justify-content:space-between">
-        <span>Fading</span>
-        <div class="strip-tab-header" style="padding:0;background:transparent;border:none">
+    <div style="flex:0 0 360px;background:var(--surf);border:1px solid var(--border);border-radius:14px;backdrop-filter:blur(12px);overflow:hidden;display:flex;flex-direction:column;">
+      <!-- header -->
+      <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 14px;border-bottom:1px solid var(--border);flex-shrink:0;">
+        <span style="font-family:var(--mono);font-size:8px;letter-spacing:0.22em;text-transform:uppercase;color:var(--faint)">Narrative shifts</span>
+        <div style="display:flex;gap:2px;">
           <button class="strip-tab active" data-period="3m">3M</button>
           <button class="strip-tab" data-period="6m">6M</button>
           <button class="strip-tab" data-period="1y">1Y</button>
         </div>
       </div>
-      <div class="strip-col-body" id="strip-fading"></div>
-    </div>
-    <div class="strip-col" style="display:flex;align-items:center;justify-content:center;max-width:48px;border-right:1px solid var(--border)">
-      <span style="color:var(--accent);opacity:0.4;font-size:18px">→</span>
-    </div>
-    <div class="strip-col">
-      <div class="strip-col-head rise2">Rising</div>
-      <div class="strip-col-body" id="strip-rising"></div>
+      <!-- shifts list -->
+      <div style="flex:1;overflow:hidden;display:flex;flex-direction:column;justify-content:center;padding:10px 14px;gap:6px;" id="shift-list"></div>
     </div>
   </div>
-</div>
+</section>
+
 
 <!-- MAIN: MAP + STATE PANEL -->
 <div class="main">
@@ -689,11 +722,54 @@ async function fetchSnap(){
     if(!r.ok) throw new Error('HTTP '+r.status);
     var d=await r.json();
     if(d.error) return;
+    // topbar
     var el=document.getElementById('live-count');
     if(el&&d.total_signals) el.textContent=d.total_signals.toLocaleString();
     var meta=document.getElementById('map-meta');
     if(meta&&d.as_of) meta.textContent='30 states · updated '+new Date(d.as_of).toLocaleTimeString('en-IN');
+    // stats strip
+    setText('sc-signals-val', d.total_signals?d.total_signals.toLocaleString():'—');
+    setText('sc-hottest-val', d.hottest_state||'—');
+    setText('sc-hottest-sub', d.hottest_score?'Attention '+d.hottest_score:'Click to explore');
+    setText('sc-cooling-val', d.fastest_cooling||'—');
+    setText('sc-cooling-sub', 'Signal velocity ↓');
+    // top narrative from state data
+    updateStripNarrative();
+    updateStripAnger();
   }catch(e){}
+}
+
+function setText(id,val){var el=document.getElementById(id);if(el)el.textContent=val;}
+
+function updateStripNarrative(){
+  var nc={};
+  Object.values(SD).forEach(function(s){(s.narratives||[]).forEach(function(n){if(n.dir==='up') nc[n.name]=(nc[n.name]||0)+n.val;});});
+  var top=Object.entries(nc).sort(function(a,b){return b[1]-a[1];})[0];
+  if(top){
+    var nm=top[0].charAt(0).toUpperCase()+top[0].slice(1);
+    setText('sc-narrative-val',nm);
+    setText('sc-narrative-sub','Rising across multiple states');
+  }
+}
+
+function updateStripAnger(){
+  var topAnger=null,topVal=0;
+  Object.entries(SD).forEach(function(kv){
+    var nm=kv[0],s=kv[1];
+    var anger=s.emotions&&s.emotions.anger?s.emotions.anger:0;
+    // normalize if decimal
+    if(anger<1) anger=anger*100;
+    if(anger>topVal){topVal=anger;topAnger=nm;}
+  });
+  if(topAnger){
+    setText('sc-anger-val',topAnger);
+    setText('sc-anger-sub','Anger '+Math.round(topVal)+'% of signals');
+  }
+}
+
+function selectHottest(){
+  var top=Object.entries(SD).sort(function(a,b){return (b[1].attention||0)-(a[1].attention||0);})[0];
+  if(top) select_(top[0]);
 }
 async function startPolling(){
   await Promise.all([fetchAllStates(),fetchSnap()]);
@@ -750,13 +826,22 @@ var MOCK_F=[
 
 function renderStrip(period){
   var data=SHIFTS[period]||SHIFTS['3m'];
-  var fEl=document.getElementById('strip-fading');
-  var rEl=document.getElementById('strip-rising');
-  fEl.innerHTML=data.map(function(s){
-    return '<div class="strip-item"><div><div class="strip-topic" style="color:var(--faint)">'+s.fading+'</div><div class="strip-note">'+s.fadingNote+'</div></div></div>';
-  }).join('');
-  rEl.innerHTML=data.map(function(s){
-    return '<div class="strip-item"><div><div class="strip-topic">'+s.rising+'</div><div class="strip-note">'+s.risingNote+'</div></div></div>';
+  var el=document.getElementById('shift-list');
+  if(!el) return;
+  el.innerHTML=data.map(function(s){
+    return '<div style="display:flex;align-items:center;gap:0;background:rgba(255,255,255,0.02);border:1px solid var(--border);border-radius:8px;overflow:hidden;">'+
+      '<div style="flex:1;padding:6px 10px;border-right:1px solid var(--border);">'+
+        '<div style="font-family:var(--mono);font-size:7.5px;letter-spacing:0.16em;text-transform:uppercase;color:var(--fall);margin-bottom:3px;">fading</div>'+
+        '<div style="font-size:12px;color:var(--dim);font-weight:500;line-height:1.2;">'+s.fading+'</div>'+
+        '<div style="font-family:var(--mono);font-size:8.5px;color:var(--faint);margin-top:2px;">'+s.fadingNote+'</div>'+
+      '</div>'+
+      '<div style="width:28px;flex-shrink:0;display:flex;align-items:center;justify-content:center;color:var(--accent);opacity:0.45;font-size:13px;">→</div>'+
+      '<div style="flex:1;padding:8px 10px;">'+
+        '<div style="font-family:var(--mono);font-size:7.5px;letter-spacing:0.16em;text-transform:uppercase;color:var(--rise);margin-bottom:3px;">rising</div>'+
+        '<div style="font-size:12px;color:var(--ink);font-weight:500;line-height:1.2;">'+s.rising+'</div>'+
+        '<div style="font-family:var(--mono);font-size:8.5px;color:var(--faint);margin-top:2px;">'+s.risingNote+'</div>'+
+      '</div>'+
+    '</div>';
   }).join('');
 }
 document.querySelectorAll('.strip-tab').forEach(function(tab){
@@ -914,13 +999,17 @@ var DEFAULT={
 function g(n){return SD[n]||Object.assign({},DEFAULT);}
 
 function aC(s){
-  if(s<20) return '#0e1e2e';
-  if(s<35) return '#153060';
-  if(s<50) return '#1e5878';
-  if(s<65) return '#8a4e10';
-  if(s<78) return '#a83010';
-  if(s<88) return '#c01808';
-  return '#dc0818';
+  if(s<8)  return '#0a1520';
+  if(s<15) return '#0e2a45';
+  if(s<22) return '#0d4070';
+  if(s<30) return '#0c5890';
+  if(s<38) return '#0d70aa';
+  if(s<46) return '#208888';
+  if(s<54) return '#c87a10';
+  if(s<62) return '#e05010';
+  if(s<72) return '#d82010';
+  if(s<82) return '#cc0808';
+  return '#ff0010';
 }
 function eC(e){
   var mx=0,dom='pride';
@@ -939,13 +1028,14 @@ var layer='attention',SEL=null,FAVS=new Set();
 
 // MAP
 function proj_(w,h,pad){
-  pad=pad||28;
-  var minLon=68.1,maxLon=97.4,minLat=6.5,maxLat=35.7;
-  function mY(lat){return Math.log(Math.tan(Math.PI/4+lat*Math.PI/360));}
-  var yMn=mY(minLat),yMx=mY(maxLat),lR=maxLon-minLon,yR=yMx-yMn;
-  var sc=Math.min((w-pad*2)/lR,(h-pad*2)/yR);
-  var ox=pad+(w-pad*2-lR*sc)/2,oy=pad+(h-pad*2-yR*sc)/2;
-  return function(lon,lat){return [ox+(lon-minLon)*sc,oy+(yMx-mY(lat))*sc];};
+  pad=pad||20;
+  var minLon=68.1,maxLon=97.4,minLat=6.5,maxLat=37.1;
+  var scX=(w-pad*2)/(maxLon-minLon);
+  var scY=(h-pad*2)/(maxLat-minLat);
+  var sc=Math.min(scX,scY);
+  var ox=pad+(w-pad*2-(maxLon-minLon)*sc)/2;
+  var oy=pad+(h-pad*2-(maxLat-minLat)*sc)/2;
+  return function(lon,lat){return [ox+(lon-minLon)*sc, oy+(maxLat-lat)*sc];};
 }
 function geo2path(geom,pj){
   var d='';
@@ -961,7 +1051,19 @@ function ctr(geom){
   if(!pts.length) return [0,0];
   return [pts.reduce(function(s,p){return s+p[0];},0)/pts.length,pts.reduce(function(s,p){return s+p[1];},0)/pts.length];
 }
-function sName(props){return props.st_nm||props.NAME_1||props.name||props.NAME||'';}
+function sName(props){
+  var raw=props.st_nm||props.NAME_1||props.name||props.NAME||'';
+  // Normalize common mismatches between TopoJSON and our SD keys
+  var map={
+    'Uttaranchal':'Uttarakhand',
+    'Uttarakhand':'Uttarakhand',
+    'Jammu & Kashmir':'Jammu and Kashmir',
+    'Jammu and Kashmir':'Jammu and Kashmir',
+    'Dadra and Nagar Haveli':'Dadra and Nagar Haveli and Daman and Diu',
+    'Daman and Diu':'Dadra and Nagar Haveli and Daman and Diu',
+  };
+  return map[raw]||raw;
+}
 
 async function loadMap(){
   try{
@@ -1033,7 +1135,7 @@ function applyLayer(){
     else if(layer==='emotion') fill=eC(d.emotions);
     else fill=vC(d.velocity);
     p.setAttribute('fill',fill);
-    p.setAttribute('fill-opacity',layer==='attention'?(0.5+d.attention/240):0.8);
+    p.setAttribute('fill-opacity',layer==='attention'?Math.max(0.25, Math.min(1.0, 0.2+d.attention/70)):0.85);
   });
 }
 
@@ -1045,11 +1147,36 @@ function attachInteractions(){
       var top=d.narratives&&d.narratives[0]?d.narratives[0].name:'—';
       var hist=d.narrativeHistory;
       var latest=hist&&hist.length?hist[hist.length-1].topic:'—';
+      // Dynamic tooltip content based on active layer
+      var layerRows='';
+      if(layer==='attention'){
+        layerRows=
+          '<div class="tt-r"><span>Attention index</span><strong>'+d.attention+'</strong></div>'+
+          (d.delta!==0?'<div class="tt-r"><span>24h shift</span><strong style="color:'+(d.delta>0?'#e05a28':'#3bb8d8')+'">'+(d.delta>0?'+':'')+d.delta+'</strong></div>':'')+
+          '<div class="tt-r"><span>Top narrative</span><strong>'+top+'</strong></div>';
+      } else if(layer==='emotion'){
+        var pal={anxiety:'#8844cc',anger:'#dd2244',hope:'#33cc66',pride:'#33aacc',fear:'#cc8833'};
+        var eList=Object.entries(d.emotions).sort(function(a,b){return b[1]-a[1];});
+        var rawT=eList.reduce(function(s,kv){return s+kv[1];},0);
+        if(rawT>0&&rawT<=1.01){eList=eList.map(function(kv){return [kv[0],Math.round(kv[1]*100)];});}
+        var tot=Math.max(1,eList.reduce(function(s,kv){return s+kv[1];},0));
+        var domEmo=eList[0];
+        layerRows=
+          '<div class="tt-r"><span>Dominant emotion</span><strong style="color:'+pal[domEmo[0]]+'">'+domEmo[0].charAt(0).toUpperCase()+domEmo[0].slice(1)+'</strong></div>'+
+          eList.slice(0,3).map(function(kv){
+            return '<div class="tt-r"><span style="display:flex;align-items:center;gap:4px"><span style="width:5px;height:5px;border-radius:50%;background:'+pal[kv[0]]+';display:inline-block"></span>'+kv[0]+'</span><strong>'+Math.round(kv[1]*100/tot)+'%</strong></div>';
+          }).join('');
+      } else {
+        var vDir=d.velocity>0.05?'Rising':d.velocity<-0.05?'Cooling':'Stable';
+        var vCol=d.velocity>0.05?'#e05a28':d.velocity<-0.05?'#3bb8d8':'#556677';
+        layerRows=
+          '<div class="tt-r"><span>Momentum</span><strong style="color:'+vCol+'">'+(d.velocity>0?'+':'')+d.velocity.toFixed(2)+'</strong></div>'+
+          '<div class="tt-r"><span>Direction</span><strong style="color:'+vCol+'">'+(d.velocity>0.1?'Rising fast':d.velocity>0.02?'Rising':d.velocity<-0.05?'Cooling':'Stable')+'</strong></div>'+
+          '<div class="tt-r"><span>24h signals</span><strong>'+(d.delta>=0?'+':'')+d.delta+'</strong></div>';
+      }
       tip.innerHTML=
         '<div class="tt-n">'+nm+'</div>'+
-        '<div class="tt-r"><span>Dominant narrative</span><strong>'+top+'</strong></div>'+
-        '<div class="tt-r"><span>Attention</span><strong>'+d.attention+'</strong></div>'+
-        (d.delta!==0?'<div class="tt-r"><span>24h shift</span><strong style="color:'+(d.delta>0?'#e05a28':'#3bb8d8')+'">'+(d.delta>0?'+':'')+d.delta+'</strong></div>':'')+
+        layerRows+
         '<div class="tt-nar"><strong>Current narrative</strong>'+latest+'</div>';
       var rect=document.querySelector('.map-inner').getBoundingClientRect();
       tip.style.left=Math.min(e.clientX-rect.left+14,rect.width-180)+'px';
@@ -1073,7 +1200,11 @@ function renderPanel(nm){
   var d=g(nm),panel=document.getElementById('state-detail');
   var isFav=FAVS.has(nm),dS=d.delta>=0?'+':'',dC=d.delta>=0?'up':'dn';
   var pal={anxiety:'#8844cc',anger:'#dd2244',hope:'#33cc66',pride:'#33aacc',fear:'#cc8833'};
-  var eL=Object.entries(d.emotions),tot=eL.reduce(function(s,kv){return s+kv[1];},0);
+  var eL=Object.entries(d.emotions);
+  // Normalize: API may return 0-1 floats OR 0-100 integers
+  var rawTot=eL.reduce(function(s,kv){return s+kv[1];},0);
+  if(rawTot>0 && rawTot<=1.01){ eL=eL.map(function(kv){return [kv[0],Math.round(kv[1]*100)];}); }
+  var tot=Math.max(1,eL.reduce(function(s,kv){return s+kv[1];},0));
   var cumA=-Math.PI/2,cx=38,cy=38,R=33,ri=20;
   var arcs=eL.map(function(kv){
     var k=kv[0],v=kv[1],fr=v/tot,a1=cumA,a2=cumA+fr*Math.PI*2;
@@ -1129,15 +1260,19 @@ function renderPanel(nm){
 
     '<div class="sp-section">'+
       '<div class="sp-sec-title">Narrative breakdown</div>'+
-      '<div class="nar-list">'+
+      (d.narratives&&d.narratives.length?
+        '<div class="nar-list">'+
         d.narratives.map(function(n){
+          var nm=n.name?n.name.charAt(0).toUpperCase()+n.name.slice(1):n.name;
+          var val=typeof n.val==='number'?n.val:0;
           return '<div class="nar-item2">'+
-            '<div class="ni-label">'+n.name+(n.dir==='up'?' <span style="color:#e05a28;font-size:9px">↑</span>':n.dir==='down'?' <span style="color:#3bb8d8;font-size:9px">↓</span>':'')+'</div>'+
-            '<div class="ni-val">'+n.val+'%</div>'+
-            '<div class="ni-track"><div class="ni-fill" style="width:'+Math.min(100,n.val*2.5)+'%;background:'+(n.dir==='up'?'#e05a28':n.dir==='down'?'#3bb8d8':'#334455')+'"></div></div>'+
+            '<div class="ni-label">'+nm+(n.dir==='up'?' <span style="color:#e05a28;font-size:9px">↑</span>':n.dir==='down'?' <span style="color:#3bb8d8;font-size:9px">↓</span>':'')+'</div>'+
+            '<div class="ni-val">'+val.toFixed(1)+'%</div>'+
+            '<div class="ni-track"><div class="ni-fill" style="width:'+Math.min(100,val*2.5)+'%;background:'+(n.dir==='up'?'#e05a28':n.dir==='down'?'#3bb8d8':'#334455')+'"></div></div>'+
           '</div>';
         }).join('')+
-      '</div>'+
+        '</div>':
+        '<div style="color:var(--faint);font-family:var(--mono);font-size:10px;padding:8px 0">No narrative data yet — ingesting signals…</div>')+
     '</div>'+
 
     '<div class="sp-section">'+
@@ -1158,7 +1293,16 @@ function renderPanel(nm){
         '<svg class="em-donut" viewBox="0 0 76 76">'+arcs+'</svg>'+
         '<div class="em-leg">'+
           eL.sort(function(a,b){return b[1]-a[1];}).map(function(kv){
-            return '<div class="em-item"><span class="em-sw" style="background:'+pal[kv[0]]+'"></span><span class="em-n">'+kv[0].charAt(0).toUpperCase()+kv[0].slice(1)+'</span><span class="em-p">'+Math.round(kv[1]*100/tot)+'%</span></div>';
+            var k=kv[0],v=kv[1];
+            var desc={anxiety:'Uncertainty & worry',anger:'Outrage & protest',hope:'Optimism & growth',pride:'Achievement & identity',fear:'Threat perception'};
+            return '<div class="em-item" style="margin-bottom:1px">'+
+              '<span class="em-sw" style="background:'+pal[k]+'"></span>'+
+              '<span class="em-n">'+k.charAt(0).toUpperCase()+k.slice(1)+'</span>'+
+              '<span class="em-p">'+Math.round(v*100/tot)+'%</span>'+
+            '</div>'+
+            (v===eL.sort(function(a,b){return b[1]-a[1];})[0][1]?
+              '<div style="font-family:var(--mono);font-size:8.5px;color:var(--faint);padding:1px 0 4px 12px;border-left:1px solid '+pal[k]+';margin-left:3px;margin-bottom:3px;">'+desc[k]+'</div>':
+            '');
           }).join('')+
         '</div>'+
       '</div>'+
