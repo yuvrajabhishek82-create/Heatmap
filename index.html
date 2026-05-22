@@ -697,6 +697,8 @@ async function fetchAllStates(){
     });
     applyLayer();
     renderMomentum();
+    updateStripNarrative();
+    updateStripAnger();
   }catch(e){console.warn('[API]',e.message);}
 }
 async function fetchDetail(name){
@@ -1065,14 +1067,19 @@ function sName(props){
   return map[raw]||raw;
 }
 
+var cachedGeo=null;
+
 async function loadMap(){
   try{
     var r=await fetch('https://cdn.jsdelivr.net/gh/udit-001/india-maps-data@master/topojson/india.json');
     var topo=await r.json();
-    var geo=topojson.feature(topo,topo.objects.states);
-    await new Promise(function(res){setTimeout(res,250);});
-    renderMap(geo);
-    setTimeout(function(){renderMap(geo);},950);
+    cachedGeo=topojson.feature(topo,topo.objects.states);
+    await new Promise(function(res){setTimeout(res,200);});
+    renderMap(cachedGeo);
+    // After live data arrives, re-apply colors WITHOUT re-rendering geometry
+    setTimeout(applyLayer, 1200);
+    setTimeout(applyLayer, 3000);
+    setTimeout(applyLayer, 6000);
   }catch(e){
     document.querySelector('.map-inner').innerHTML='<div style="color:#2a3a4a;padding:40px;text-align:center;font-family:monospace;font-size:11px;height:100%;display:flex;align-items:center;justify-content:center">Map unavailable</div>';
   }
@@ -1200,7 +1207,8 @@ function renderPanel(nm){
   var d=g(nm),panel=document.getElementById('state-detail');
   var isFav=FAVS.has(nm),dS=d.delta>=0?'+':'',dC=d.delta>=0?'up':'dn';
   var pal={anxiety:'#8844cc',anger:'#dd2244',hope:'#33cc66',pride:'#33aacc',fear:'#cc8833'};
-  var eL=Object.entries(d.emotions);
+  var emotions=d.emotions&&Object.keys(d.emotions).length?d.emotions:{anxiety:20,anger:15,hope:25,pride:25,fear:15};
+  var eL=Object.entries(emotions);
   // Normalize: API may return 0-1 floats OR 0-100 integers
   var rawTot=eL.reduce(function(s,kv){return s+kv[1];},0);
   if(rawTot>0 && rawTot<=1.01){ eL=eL.map(function(kv){return [kv[0],Math.round(kv[1]*100)];}); }
@@ -1272,7 +1280,7 @@ function renderPanel(nm){
           '</div>';
         }).join('')+
         '</div>':
-        '<div style="color:var(--faint);font-family:var(--mono);font-size:10px;padding:8px 0">No narrative data yet — ingesting signals…</div>')+
+        '<div style="color:var(--faint);font-family:var(--mono);font-size:10px;padding:8px 0;line-height:1.6">Low-signal region. National press coverage is limited for this state — regional language sources are being monitored.</div>')+
     '</div>'+
 
     '<div class="sp-section">'+
