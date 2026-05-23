@@ -1310,15 +1310,61 @@ CHANNEL_TYPE_BASELINE: dict[str, float] = {
     "entertainment": 300_000,
 }
 
-async def fetch_youtube_channel_videos(channel_id: str, client: httpx.AsyncClient, max_results: int = 8) -> list[dict]:
-    """Fetch recent videos from a YouTube channel."""
+async def fetch_youtube_search(query: str, client: httpx.AsyncClient, max_results: int = 8) -> list[dict]:
+    """Search YouTube for recent videos matching a query — more reliable than channel ID lookup."""
     if not YOUTUBE_API_KEY:
         return []
     try:
+        import urllib.parse
+        encoded = urllib.parse.quote(query)
+        # publishedAfter = 3 days ago for fresh results
+        published_after = (datetime.now(timezone.utc) - timedelta(days=3)).strftime("%Y-%m-%dT%H:%M:%SZ")
+        url = (
+            f"https://www.googleapis.com/youtube/v3/search"
+            f"?key={YOUTUBE_API_KEY}&q={encoded}"
+            f"&part=snippet&type=video&order=relevance"
+            f"&relevanceLanguage=hi&regionCode=IN"
+            f"&publishedAfter={published_after}"
+            f"&maxResults={max_results}"
+        )
+        r = await client.get(url)
+        if r.status_code != 200:
+            print(f"[youtube] Search error {r.status_code}: {r.text[:100]}")
+            return []
+        data = r.json()
+        videos = []
+        for item in data.get("items", []):
+            snippet = item.get("snippet", {})
+            video_id = item.get("id", {}).get("videoId", "")
+            published = snippet.get("publishedAt", "")
+            try:
+                pub_dt = datetime.fromisoformat(published.replace("Z", "+00:00"))
+            except Exception:
+                pub_dt = datetime.now(timezone.utc)
+            videos.append({
+                "video_id":     video_id,
+                "title":        snippet.get("title", ""),
+                "description":  snippet.get("description", "")[:200],
+                "published_at": pub_dt,
+                "channel_title": snippet.get("channelTitle", ""),
+            })
+        return videos
+    except Exception as e:
+        print(f"[youtube] Search error for '{query}': {e}")
+        return []
+
+async def fetch_youtube_channel_videos(channel_id: str, client: httpx.AsyncClient, max_results: int = 8) -> list[dict]:
+    """Fetch recent videos from a YouTube channel by ID."""
+    if not YOUTUBE_API_KEY:
+        return []
+    try:
+        published_after = (datetime.now(timezone.utc) - timedelta(days=3)).strftime("%Y-%m-%dT%H:%M:%SZ")
         url = (
             f"https://www.googleapis.com/youtube/v3/search"
             f"?key={YOUTUBE_API_KEY}&channelId={channel_id}"
-            f"&part=snippet&order=date&type=video&maxResults={max_results}"
+            f"&part=snippet&order=date&type=video"
+            f"&publishedAfter={published_after}"
+            f"&maxResults={max_results}"
         )
         r = await client.get(url)
         if r.status_code != 200:
@@ -1333,13 +1379,10 @@ async def fetch_youtube_channel_videos(channel_id: str, client: httpx.AsyncClien
                 pub_dt = datetime.fromisoformat(published.replace("Z", "+00:00"))
             except Exception:
                 pub_dt = datetime.now(timezone.utc)
-            # Only last 7 days
-            if (datetime.now(timezone.utc) - pub_dt).days > 7:
-                continue
             videos.append({
-                "video_id":    video_id,
-                "title":       snippet.get("title", ""),
-                "description": snippet.get("description", "")[:200],
+                "video_id":     video_id,
+                "title":        snippet.get("title", ""),
+                "description":  snippet.get("description", "")[:200],
                 "published_at": pub_dt,
                 "channel_title": snippet.get("channelTitle", ""),
             })
@@ -1377,19 +1420,27 @@ async def fetch_youtube_video_stats(video_ids: list[str], client: httpx.AsyncCli
         return {}
 
 async def ingest_youtube_for_state(state: str, client: httpx.AsyncClient) -> int:
-    """Ingest YouTube signals for a state from state-specific channels."""
+    """Ingest YouTube signals for a state — uses keyword search for reliability."""
     if not YOUTUBE_API_KEY:
-        return 0
-    channels = STATE_YT_CHANNELS.get(state, [])
-    if not channels:
         return 0
 
     added = 0
     all_videos = []
+    # Default channel type for keyword-search results
     video_to_channel: dict[str, dict] = {}
 
-    for ch in channels[:6]:  # max 6 channels per state per cycle
-        videos = await fetch_youtube_channel_videos(ch["id"], client, max_results=5)
+    # Use STATE_QUERIES for keyword searches — guaranteed fresh results
+    queries = STATE_QUERIES.get(state, [f"{state} news", f"{state} politics"])
+    for q in queries[:2]:
+        videos = await fetch_youtube_search(q, client, max_results=6)
+        for v in videos:
+            all_videos.append(v)
+            video_to_channel[v["video_id"]] = {"name": v["channel_title"], "type": "regional"}
+
+    # Also try channel-based for states with known good channels
+    channels = STATE_YT_CHANNELS.get(state, [])
+    for ch in channels[:2]:
+        videos = await fetch_youtube_channel_videos(ch["id"], client, max_results=4)
         for v in videos:
             all_videos.append(v)
             video_to_channel[v["video_id"]] = ch
@@ -1451,10 +1502,54 @@ async def ingest_youtube_for_state(state: str, client: httpx.AsyncClient) -> int
     return added
 
 async def ingest_youtube_national(client: httpx.AsyncClient) -> int:
-    """Ingest national YouTube channels and geo-tag to relevant states."""
+    """Ingest national YouTube via keyword search and channel IDs."""
     if not YOUTUBE_API_KEY:
         return 0
     added = 0
+    # Keyword searches for national political topics
+    national_queries = [
+        "India politics news today",
+        "BJP Congress Modi news",
+        "India Parliament news",
+        "India state election news",
+    ]
+    for q in national_queries:
+        videos = await fetch_youtube_search(q, client, max_results=8)
+        if not videos:
+            continue
+        video_ids = [v["video_id"] for v in videos if v["video_id"]]
+        stats = await fetch_youtube_video_stats(video_ids, client)
+        for video in videos:
+            title = video["title"].strip()
+            if not title:
+                continue
+            text = title + " " + video["description"]
+            tagged = geotag_states(text)
+            if not tagged:
+                continue
+            s_val = stats.get(video["video_id"], {})
+            views = s_val.get("views", 0)
+            normalized = (views + s_val.get("comments",0)*10) / 10000
+            intensity = min(1.0, 0.3 + math.log1p(normalized)*0.2)
+            narratives = classify_narratives(text)
+            emotions = classify_emotion(text)
+            for state in tagged:
+                if state not in INDIAN_STATES:
+                    continue
+                sig = {
+                    "title": title,
+                    "source": f"youtube/{video['channel_title'] or 'news'}",
+                    "source_url": f"https://youtube.com/watch?v={video['video_id']}",
+                    "published_at": video["published_at"],
+                    "narratives": narratives, "emotions": emotions,
+                    "intensity": intensity, "body": video["description"],
+                    "language": "en", "yt_channel_type": "national",
+                }
+                if store.add_signal(state, sig):
+                    added += 1
+        await asyncio.sleep(0.5)
+
+    # Also try channel IDs
     for ch in NATIONAL_YT_CHANNELS:
         videos = await fetch_youtube_channel_videos(ch["id"], client, max_results=8)
         if not videos:
