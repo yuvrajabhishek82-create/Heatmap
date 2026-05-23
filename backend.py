@@ -1767,6 +1767,7 @@ def build_insights() -> dict:
         "Central": ["Madhya Pradesh","Chhattisgarh"],
     }
     # National top narrative for comparison
+    top_all = sorted(nar_all.items(), key=lambda x: x[1], reverse=True)
     nat_top = top_all[0][0] if top_all else None
 
     regional = []
