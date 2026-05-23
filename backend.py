@@ -415,6 +415,10 @@ class Store:
         self.seen_urls: set[str] = set()
         self.last_ingest: datetime | None = None
         self.ingest_running: bool = False
+        self.cache_built_at: datetime | None = None
+        self.cache_snapshot: dict | None = None
+        self.cache_insights: dict | None = None
+        self.context_cache: dict = {}
         # 8-slot daily history per state (circular)
         self.history: dict[str, list[float]] = {s: [] for s in INDIAN_STATES}
 
@@ -903,6 +907,7 @@ async def recompute_all_scores():
         print(f"[insights] Cached {len(store.cache_insights.get('rising',[]))} rising narratives")
     except Exception as e:
         print(f"[insights] Error: {e}")
+    store.cache_built_at = datetime.now(timezone.utc)
 
 
 # ============================================================================
