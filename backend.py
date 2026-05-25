@@ -324,7 +324,7 @@ NARRATIVES = [
     "inflation", "caste", "language politics", "regional identity",
     "education", "law & order", "governance", "elections", "security",
     "border issues", "environment", "farmer issues", "infrastructure",
-    "tribal issues", "migration",
+    "tribal issues", "migration", "protest", "health",
 ]
 
 LANG_CODES = ["en-IN", "hi-IN", "ta-IN", "te-IN", "mr-IN", "bn-IN", "kn-IN", "ml-IN"]
