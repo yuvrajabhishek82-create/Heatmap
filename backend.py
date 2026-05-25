@@ -368,44 +368,51 @@ STATE_ALIASES: dict[str, list[str]] = {
 }
 
 NARRATIVE_KEYWORDS: dict[str, list[str]] = {
-    "unemployment":      ["unemployment", "jobless", "hiring", "recruitment exam", "vacancy", "layoffs", "naukri"],
-    "corruption":        ["scam", "corruption", "bribe", "ed raid", "cbi", "paper leak", "embezzle"],
-    "religion":          ["temple", "mosque", "festival", "communal", "religious", "yatra", "waqf"],
-    "economy":           ["gdp", "growth", "investment", "industry", "msme", "export", "manufacturing"],
-    "inflation":         ["inflation", "price rise", "petrol price", "onion price", "tomato price", "cpi"],
-    "caste":             ["caste", "dalit", "obc", "reservation", "quota", "sc/st"],
-    "language politics": ["hindi imposition", "three-language", "kannada signage", "tamil", "marathi"],
-    "regional identity": ["regional", "sons of soil", "outsider", "marathi manoos", "bhumiputra"],
-    "education":         ["school", "university", "neet", "jee", "exam", "syllabus", "student strike"],
-    "law & order":       ["crime", "arrest", "encounter", "murder", "rape", "kidnap", "police"],
-    "governance":        ["cm", "cabinet", "minister", "policy", "scheme", "yojana", "bill", "assembly"],
-    "elections":         ["election", "vote", "poll", "campaign", "candidate", "bypoll"],
-    "border issues":     ["border", "loc", "infiltration", "drone", "bsf", "china border", "lac", "myanmar"],
-    "environment":       ["pollution", "air quality", "climate", "flood", "drought", "heatwave", "cyclone"],
-    "farmer issues":     ["farmer", "msp", "agriculture", "kisan", "crop", "monsoon", "harvest"],
-    "infrastructure":    ["highway", "metro", "airport", "expressway", "bullet train", "road"],
-    "nationalism":       ["nation", "patriotic", "anti-national", "tiranga", "independence"],
-    "tribal issues":     ["tribal", "adivasi", "vanvasi", "forest rights", "scheduled tribe"],
-    "migration":         ["migrant", "migration", "remittance", "gulf return", "exodus"],
-    "security":          ["terror", "blast", "attack", "naxal", "maoist", "encounter", "ied"],
+    "unemployment":      ["unemployment", "jobless", "job loss", "recruitment exam cancelled", "vacancy", "layoffs", "no jobs", "retrenchment"],
+    "corruption":        ["scam", "corruption", "bribe", "ed raid", "cbi probe", "paper leak", "embezzle", "disproportionate assets", "hawala", "money laundering"],
+    "religion":          ["communal tension", "communal violence", "mosque demolition", "temple dispute", "religious conversion", "waqf", "cow vigilante", "religious riot", "mandir", "masjid row"],
+    "economy":           ["gdp slowdown", "investment", "industry shutdown", "msme crisis", "export decline", "manufacturing"],
+    "inflation":         ["inflation", "price rise", "petrol price hike", "onion price", "tomato price crisis", "cost of living", "cpi surge"],
+    "caste":             ["caste violence", "caste discrimination", "dalit atrocity", "obc reservation", "quota protest", "sc/st", "upper caste", "jati"],
+    "language politics": ["hindi imposition", "three-language policy", "kannada signage", "language dispute", "medium of instruction", "regional language"],
+    "regional identity": ["sons of soil", "outsider", "marathi manoos", "bhumiputra", "domicile", "anti-outsider"],
+    "education":         ["neet controversy", "jee protest", "paper leak", "exam scam", "student protest", "university shutdown", "fee hike", "student agitation"],
+    "law & order":       ["murder", "rape", "gang rape", "lynching", "mob violence", "kidnapping", "encounter killing", "custodial death", "crime wave", "law and order breakdown"],
+    "governance":        ["government collapse", "no confidence", "policy failure", "corruption charges", "misgovernance", "administrative failure", "chief minister resign", "political crisis", "constitutional crisis"],
+    "elections":         ["election", "bypoll", "election commission", "poll violence", "vote buying", "candidate", "model code violation", "election result"],
+    "border issues":     ["border tension", "loc violation", "infiltration", "drone attack", "bsf", "china border", "lac standoff", "myanmar border", "pakistan border"],
+    "environment":       ["pollution crisis", "air quality hazardous", "flood", "drought", "heatwave deaths", "cyclone", "landslide", "earthquake", "environmental disaster"],
+    "farmer issues":     ["farmer protest", "msp demand", "crop failure", "kisan andolan", "farm distress", "farmer suicide", "debt waiver", "agriculture crisis"],
+    "infrastructure":    ["highway accident", "bridge collapse", "metro accident", "road death", "infrastructure failure", "power outage", "water crisis"],
+    "nationalism":       ["anti-national", "sedition", "patriotic movement", "bharat mata", "independence day", "republic day"],
+    "tribal issues":     ["tribal displacement", "adivasi protest", "vanvasi", "forest rights violation", "scheduled tribe atrocity", "tribal conflict"],
+    "migration":         ["migrant workers", "mass migration", "exodus", "gulf return", "labour migration crisis", "displaced"],
+    "security":          ["terror attack", "blast", "naxal attack", "maoist", "encounter", "ied blast", "security forces killed", "militant", "insurgent"],
+    "protest":           ["protest", "agitation", "demonstration", "bandh", "strike", "rally", "march", "sit-in", "dharna", "blockade"],
+    "health":            ["disease outbreak", "epidemic", "hospital crisis", "medicine shortage", "health emergency", "malnutrition", "encephalitis", "dengue outbreak"],
 }
 
 EMOTION_KEYWORDS: dict[str, list[str]] = {
-    "anger":   ["outrage","fury","angry","slam","blast","condemn","protest","demand","furious",
-                "backlash","controversy","clash","dispute","accuse","oppose","reject","denounce",
-                "criticize","scam","corruption","fraud","arrested","violence","riot","agitation"],
+    "anger":   ["outrage","fury","angry","furious","slams","blasts","condemns","protests erupt",
+                "backlash","clashes","dispute","accuses","rejects","denounces",
+                "criticizes","scam","corruption","fraud","violence erupts","riot","agitation",
+                "demands resignation","opposes","uproar","controversy","tensions rise"],
     "anxiety": ["worry","concern","anxious","alarm","uncertain","crisis","panic","shortage",
-                "inflation","unemployment","struggling","challenging","difficult","slowdown",
-                "debt","deficit","flood","drought","disaster","tension","unrest","instability"],
-    "hope":    ["hope","optimism","progress","growth","achievement","milestone","breakthrough",
-                "investment","develop","improve","success","launch","inaugurate","record",
-                "boost","rise","expand","reform","initiative","recovery","revival","surge"],
-    "pride":   ["pride","honor","celebrate","victory","historic","proud","remarkable","excellence",
-                "awarded","recognition","heritage","culture","national","champion","gold","medal",
-                "win","landmark","tribute","honour","distinguished","celebrated"],
-    "fear":    ["threat","danger","attack","warn","terror","menace","risk","unsafe","incident",
-                "killing","crime","conflict","border","infiltration","security","casualty",
-                "explosion","shoot","rape","abduct","missing","hostage","military"],
+                "inflation","unemployment","struggling","difficult","slowdown","recession",
+                "debt","deficit","flood devastation","drought","disaster","tension","unrest",
+                "instability","fear spreads","apprehensive","distress","economic anxiety"],
+    "hope":    ["breakthrough","historic agreement","peace deal","major reform",
+                "significant progress","transformative","milestone achieved",
+                "economic revival","recovery signals","first time in history",
+                "landmark decision","game changer","promising development"],
+    "pride":   ["pride","historic victory","honor","celebrates achievement","proud moment",
+                "awarded","international recognition","heritage","champion","gold medal",
+                "landmark win","tribute","distinguished","celebrated achievement",
+                "national pride","excellence recognised"],
+    "fear":    ["terror attack","explosion","blast","naxal attack","militants strike",
+                "security threat","unsafe","killing","crime wave","conflict escalates",
+                "infiltration","casualties","ied","shoot","abduct","missing persons",
+                "hostage","military crackdown","encounter","armed attack"],
 }
 
 # ============================================================================
@@ -840,15 +847,28 @@ async def recompute_state_score(state: str) -> dict:
     raw_count = len(sigs_48h)
     deviation_ratio = raw_count / max(baseline, 0.1)
     normalized = weighted_volume * (deviation_ratio ** 0.5)
-    attention = round(min(99, 100 * math.tanh(normalized / (baseline * 1.5))), 1)
+    # Use higher denominator to prevent premature saturation
+    # baseline * 6 means a state needs 4x its expected volume to hit ~80
+    attention = round(min(95, 100 * math.tanh(normalized / (baseline * 6.0))), 1)
     attention = round(attention * conf_weight, 1)
 
-    # Momentum
+    # Momentum — compare last 12h vs previous 12h for meaningful velocity
+    sigs_12h_recent = [s for s in sigs_48h if (now - s["published_at"]).total_seconds() < 43200]
+    sigs_12h_older  = [s for s in sigs_48h if 43200 <= (now - s["published_at"]).total_seconds() < 86400]
+    recent_12 = len(sigs_12h_recent)
+    older_12  = len(sigs_12h_older)
     prev_count = len(sigs_prev)
     delta_24h = round(float(raw_count - prev_count), 1)
-    velocity = round(delta_24h / max(1, prev_count), 3)
-    if velocity > 0.5 and confidence in ("MEDIUM", "HIGH"):
-        attention = round(min(99, attention * 1.2), 1)
+
+    if older_12 > 0:
+        raw_vel = (recent_12 - older_12) / max(older_12, 1)
+    elif prev_count > 0:
+        raw_vel = (raw_count - prev_count) / max(prev_count, 1)
+    else:
+        raw_vel = 0.0
+    velocity = round(math.tanh(raw_vel * 2), 3)  # always -1 to +1
+    if velocity > 0.3 and confidence in ("MEDIUM", "HIGH"):
+        attention = round(min(95, attention * 1.15), 1)
 
     is_regional = deviation_ratio > 2.0 and raw_count < baseline * 1.5
 
