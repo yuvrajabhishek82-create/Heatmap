@@ -984,41 +984,70 @@ async def recompute_state_score(state: str) -> dict:
 
     is_regional = deviation_ratio > 2.0 and raw_count < baseline * 1.5
 
-    # Narratives
-    nar_now: dict[str, int] = {}
+    # ── Cluster-coherent scoring ─────────────────────────────────────────
+    # Step 1: Score each signal by weighted importance
+    def signal_weight(s):
+        decay = 2 ** (-(now - s["published_at"]).total_seconds() / 129_600)
+        src_w = get_source_weight(s.get("source", ""))
+        intensity = s.get("intensity", 0.5)
+        return decay * src_w * intensity
+
+    weighted_sigs = [(s, signal_weight(s)) for s in sigs_48h]
+    weighted_sigs.sort(key=lambda x: -x[1])
+
+    # Step 2: Build narrative scores weighted by signal importance
+    nar_now: dict[str, float] = {}
     nar_prev_d: dict[str, int] = {}
-    for s in sigs_48h:
+    for s, w in weighted_sigs:
         for n in s.get("narratives", []):
-            nar_now[n] = nar_now.get(n, 0) + 1
+            nar_now[n] = nar_now.get(n, 0) + w
     for s in sigs_prev:
         for n in s.get("narratives", []):
             nar_prev_d[n] = nar_prev_d.get(n, 0) + 1
-    total_nar = max(1, sum(nar_now.values()))
+
+    total_nar = max(0.001, sum(nar_now.values()))
     top_narratives = sorted(nar_now.items(), key=lambda kv: -kv[1])[:5]
+
+    # Step 3: Identify dominant narrative cluster
+    dominant_nar = top_narratives[0][0] if top_narratives else None
+
+    # Step 4: Extract signals that belong to the dominant narrative cluster
+    # This ensures emotion and momentum are derived from the SAME discourse
+    if dominant_nar:
+        cluster_sigs = [s for s, w in weighted_sigs
+                       if dominant_nar in s.get("narratives", [])]
+        # Fall back to all signals if cluster is too small
+        if len(cluster_sigs) < max(2, len(sigs_48h) // 4):
+            cluster_sigs = [s for s, w in weighted_sigs]
+    else:
+        cluster_sigs = [s for s, w in weighted_sigs]
+
+    # Step 5: Derive EMOTION from the dominant cluster signals
+    emo_totals: dict[str, float] = {k: 0.0 for k in EMOTION_KEYWORDS}
+    for s in cluster_sigs:
+        w = signal_weight(s)
+        for k, v in s.get("emotions", {}).items():
+            if k in emo_totals:
+                emo_totals[k] += v * w  # weight emotion by signal importance
+    total_emo = sum(emo_totals.values())
+    emotions = {k: round(v / total_emo, 3) for k, v in emo_totals.items()
+                if emo_totals[k] > 0} if total_emo > 0 else {}
+
+    # Step 6: Build narrative breakdown with persistence context
     narrative_breakdown = []
     for n, c in top_narratives:
         prev = nar_prev_d.get(n, 0)
         val = round(c / total_nar * 100, 1)
-        # Factor in narrative persistence from DB — sustained narratives are more significant
         persistence = store.narrative_persistence.get(state, {}).get(n, 0)
         if persistence >= 3:
-            direction = "sustained"  # holding for 3+ days
-        elif prev == 0 or c > prev * 1.1:
+            direction = "sustained"
+        elif prev == 0 or c > prev * 0.5:
             direction = "up"
-        elif c < prev * 0.9:
+        elif c < prev * 0.3:
             direction = "down"
         else:
             direction = "flat"
         narrative_breakdown.append({"name": n, "val": val, "dir": direction})
-
-    # Emotions
-    emo_totals: dict[str, float] = {k: 0.0 for k in EMOTION_KEYWORDS}
-    for s in sigs_48h:
-        for k, v in s.get("emotions", {}).items():
-            if k in emo_totals:
-                emo_totals[k] += v
-    total_emo = sum(emo_totals.values())
-    emotions = {k: round(v / total_emo, 3) for k, v in emo_totals.items() if emo_totals[k] > 0} if total_emo > 0 else {}
 
     # Articles (deduped by source and title)
     seen_src2: set[str] = set()
@@ -1112,7 +1141,38 @@ async def recompute_state_score(state: str) -> dict:
     elif is_regional and summary:
         summary = f"Regional signal spike in {state}. " + summary
 
+    # Dominant emotion derived from cluster signals — contextually aligned with dominant narrative
     dominant_emotion = max(emotions, key=lambda k: emotions[k]) if emotions else None
+
+    # Coherence check: if emotion doesn't align with narrative, re-derive from all signals
+    # Some emotion-narrative pairs are naturally coherent; flag mismatches
+    COHERENT_PAIRS = {
+        "border issues":   {"fear", "anxiety", "anger"},
+        "law & order":     {"anger", "fear", "anxiety"},
+        "corruption":      {"anger", "anxiety"},
+        "elections":       {"hope", "pride", "anxiety", "anger"},
+        "governance":      {"anger", "anxiety", "hope"},
+        "protest":         {"anger", "anxiety"},
+        "security":        {"fear", "anxiety", "anger"},
+        "unemployment":    {"anxiety", "anger"},
+        "farmer issues":   {"anger", "anxiety"},
+        "religion":        {"anger", "pride", "fear"},
+        "environment":     {"anxiety", "fear"},
+        "economy":         {"anxiety", "anger", "hope"},
+        "infrastructure":  {"hope", "pride"},
+        "education":       {"anxiety", "anger", "hope"},
+        "caste":           {"anger", "anxiety", "fear"},
+        "nationalism":     {"pride", "anger"},
+        "health":          {"anxiety", "fear"},
+    }
+    if dominant_narrative and dominant_emotion:
+        coherent = COHERENT_PAIRS.get(dominant_narrative, set())
+        if coherent and dominant_emotion not in coherent:
+            # Re-derive from coherent emotions only
+            coherent_emos = {k: v for k, v in emotions.items() if k in coherent}
+            if coherent_emos:
+                dominant_emotion = max(coherent_emos, key=lambda k: coherent_emos[k])
+
     dominant_narrative = top_narratives[0][0] if top_narratives else None
 
     return {
