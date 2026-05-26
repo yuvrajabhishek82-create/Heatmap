@@ -234,13 +234,14 @@ async def compute_db_intelligence():
                 print(f"[intelligence] Abnormal movement: {state} ({current} vs baseline {baseline:.1f})")
 
         # ── Narrative persistence: how many consecutive days each narrative dominated ──
+        cutoff_14d_date = (now - timedelta(days=14)).date()
         nar_rows = await conn.fetch("""
             SELECT state, dominant_narrative, COUNT(*) as days
             FROM daily_snapshots
-            WHERE date > $1 AND dominant_narrative IS NOT NULL
+            WHERE date > $1::date AND dominant_narrative IS NOT NULL
             GROUP BY state, dominant_narrative
             ORDER BY state, days DESC
-        """, (now - timedelta(days=14)).date())
+        """, cutoff_14d_date)
 
         store.narrative_persistence = {}
         for row in nar_rows:
@@ -1144,8 +1145,10 @@ async def recompute_state_score(state: str) -> dict:
     # Dominant emotion derived from cluster signals — contextually aligned with dominant narrative
     dominant_emotion = max(emotions, key=lambda k: emotions[k]) if emotions else None
 
-    # Coherence check: if emotion doesn't align with narrative, re-derive from all signals
-    # Some emotion-narrative pairs are naturally coherent; flag mismatches
+    # Derive dominant_narrative first, then apply coherence check
+    dominant_narrative = top_narratives[0][0] if top_narratives else None
+
+    # Coherence check: ensure emotion aligns with the dominant narrative
     COHERENT_PAIRS = {
         "border issues":   {"fear", "anxiety", "anger"},
         "law & order":     {"anger", "fear", "anxiety"},
@@ -1168,12 +1171,9 @@ async def recompute_state_score(state: str) -> dict:
     if dominant_narrative and dominant_emotion:
         coherent = COHERENT_PAIRS.get(dominant_narrative, set())
         if coherent and dominant_emotion not in coherent:
-            # Re-derive from coherent emotions only
             coherent_emos = {k: v for k, v in emotions.items() if k in coherent}
             if coherent_emos:
                 dominant_emotion = max(coherent_emos, key=lambda k: coherent_emos[k])
-
-    dominant_narrative = top_narratives[0][0] if top_narratives else None
 
     return {
         "name": state, "attention": attention, "delta_24h": delta_24h,
